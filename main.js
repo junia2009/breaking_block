@@ -42,6 +42,40 @@ function init3D() {
   floor.position.y = -2;
   scene.add(floor);
 
+  // パドル
+  const paddleGeo = new THREE.BoxGeometry(6, 0.7, 1.2);
+  const paddleMat = new THREE.MeshPhongMaterial({ color: 0x2196f3 });
+  const paddle = new THREE.Mesh(paddleGeo, paddleMat);
+  paddle.position.set(0, -1.5, 20);
+  scene.add(paddle);
+
+  // ボール
+  const ballGeo = new THREE.SphereGeometry(0.6, 32, 32);
+  const ballMat = new THREE.MeshPhongMaterial({ color: 0xffeb3b });
+  const ball = new THREE.Mesh(ballGeo, ballMat);
+  ball.position.set(0, 0, 18);
+  scene.add(ball);
+
+  // ブロック
+  const blocks = [];
+  const blockRows = 5;
+  const blockCols = 7;
+  const blockW = 3.2;
+  const blockH = 1.2;
+  const blockD = 1;
+  for (let r = 0; r < blockRows; r++) {
+    for (let c = 0; c < blockCols; c++) {
+      const blockGeo = new THREE.BoxGeometry(blockW, blockH, blockD);
+      const blockMat = new THREE.MeshPhongMaterial({ color: 0xe57373 });
+      const block = new THREE.Mesh(blockGeo, blockMat);
+      block.position.x = (c - (blockCols - 1) / 2) * (blockW + 0.4);
+      block.position.y = 0.5;
+      block.position.z = 6 - r * (blockD + 0.5);
+      scene.add(block);
+      blocks.push(block);
+    }
+  }
+
   animate();
 }
 
