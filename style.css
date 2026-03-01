@@ -1,9 +1,9 @@
 body {
   margin: 0;
   padding: 0;
-  background: #222;
-  color: #fff;
-  font-family: sans-serif;
+  background: radial-gradient(ellipse at center, #23272b 0%, #0d1012 100%);
+  color: #ffe082;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
   height: 100vh;
   overflow: hidden;
 }
@@ -21,23 +21,40 @@ body {
   top: 24px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 2.2rem;
-  letter-spacing: 0.1em;
+  font-size: 2.4rem;
+  letter-spacing: 0.15em;
   margin: 0;
   z-index: 10;
   pointer-events: none;
-  text-shadow: 0 2px 8px #000a;
+  text-shadow: 0 2px 16px #ff1744, 0 0 32px #00e5ff;
+  color: #ffe082;
+  border-bottom: 3px solid #ff1744;
+  padding-bottom: 6px;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
 }
 #game-canvas {
-  background: #333;
+  background: #23272b;
   width: 100vw;
   height: 80vh;
   max-width: 480px;
   max-height: 800px;
   display: block;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  border-radius: 18px;
+  box-shadow: 0 4px 32px #ff1744cc, 0 0 32px #00e5ff44;
+  border: 2.5px solid #ff1744;
 }
+/* アイアンマン風メッセージ */
+#game-message {
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  color: #00e5ff;
+  text-shadow: 0 0 16px #00e5ff, 0 0 32px #ff1744;
+  background: rgba(20, 20, 30, 0.7);
+  border: 2px solid #ff1744;
+  border-radius: 12px;
+  padding: 18px 32px;
+  box-shadow: 0 0 32px #ff174444, 0 0 32px #00e5ff44;
+}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
 @media (orientation: landscape) {
   #game-container {
     flex-direction: row;
