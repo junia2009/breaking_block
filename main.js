@@ -1,8 +1,58 @@
+// ゲーム状態
+let isGameOver = false;
+let isGameClear = false;
+
+// メッセージ表示
+function showMessage(text) {
+  let msg = document.getElementById('game-message');
+  if (!msg) {
+    msg = document.createElement('div');
+    msg.id = 'game-message';
+    msg.style.position = 'absolute';
+    msg.style.top = '50%';
+    msg.style.left = '50%';
+    msg.style.transform = 'translate(-50%, -50%)';
+    msg.style.fontSize = '2.2rem';
+    msg.style.color = '#fff';
+    msg.style.textShadow = '0 2px 8px #000a';
+    msg.style.zIndex = '20';
+    msg.style.pointerEvents = 'none';
+    document.getElementById('game-container').appendChild(msg);
+  }
+  msg.textContent = text;
+  msg.style.display = 'block';
+}
+
+function hideMessage() {
+  const msg = document.getElementById('game-message');
+  if (msg) msg.style.display = 'none';
+}
+// パドル操作（マウス・タッチ）
+function setupPaddleControl() {
+  // マウス操作
+  window.addEventListener('mousemove', (e) => {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    // -14〜14の範囲でパドルを動かす
+    paddle.position.x = Math.max(-14, Math.min(14, x * 14));
+  });
+  // タッチ操作
+  window.addEventListener('touchmove', (e) => {
+    if (e.touches.length > 0) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const x = ((e.touches[0].clientX - rect.left) / rect.width) * 2 - 1;
+      paddle.position.x = Math.max(-14, Math.min(14, x * 14));
+    }
+  }, { passive: false });
+}
 // Three.jsによる3Dブロック崩しの初期化
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.min.js';
 
 const container = document.getElementById('game-container');
 let renderer, scene, camera;
+let paddle, ball;
+let ballVelocity = { x: 0.18, y: 0, z: -0.22 };
+let blocks = [];
 
 function init3D() {
   // レンダラー
@@ -45,19 +95,18 @@ function init3D() {
   // パドル
   const paddleGeo = new THREE.BoxGeometry(6, 0.7, 1.2);
   const paddleMat = new THREE.MeshPhongMaterial({ color: 0x2196f3 });
-  const paddle = new THREE.Mesh(paddleGeo, paddleMat);
+  paddle = new THREE.Mesh(paddleGeo, paddleMat);
   paddle.position.set(0, -1.5, 20);
   scene.add(paddle);
 
   // ボール
   const ballGeo = new THREE.SphereGeometry(0.6, 32, 32);
   const ballMat = new THREE.MeshPhongMaterial({ color: 0xffeb3b });
-  const ball = new THREE.Mesh(ballGeo, ballMat);
+  ball = new THREE.Mesh(ballGeo, ballMat);
   ball.position.set(0, 0, 18);
   scene.add(ball);
 
   // ブロック
-  const blocks = [];
   const blockRows = 5;
   const blockCols = 7;
   const blockW = 3.2;
@@ -76,12 +125,89 @@ function init3D() {
     }
   }
 
+  setupPaddleControl();
   animate();
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
+
+  // ボール移動・壁反射・パドル反射
+  function updateBall() {
+    if (isGameOver || isGameClear) return;
+    // 移動
+    ball.position.x += ballVelocity.x;
+    ball.position.z += ballVelocity.z;
+
+    // 壁反射（左右）
+    if (ball.position.x > 14 || ball.position.x < -14) {
+      ballVelocity.x *= -1;
+      ball.position.x = Math.max(Math.min(ball.position.x, 14), -14);
+    }
+    // 壁反射（上）
+    if (ball.position.z < -23) {
+      ballVelocity.z *= -1;
+      ball.position.z = -23;
+    }
+    // パドル反射
+    if (
+      ball.position.z > paddle.position.z - 0.8 &&
+      ball.position.z < paddle.position.z + 0.8 &&
+      ball.position.x > paddle.position.x - 3.2 &&
+      ball.position.x < paddle.position.x + 3.2 &&
+      ballVelocity.z > 0
+    ) {
+      ballVelocity.z *= -1;
+      // パドルの端で跳ね返るときに角度をつける
+      const hitPos = (ball.position.x - paddle.position.x) / 3.2;
+      ballVelocity.x += hitPos * 0.08;
+      // 速度の上限
+      ballVelocity.x = Math.max(Math.min(ballVelocity.x, 0.35), -0.35);
+    }
+    // ブロック当たり判定・消去
+    let blockHit = false;
+    for (let i = blocks.length - 1; i >= 0; i--) {
+      const block = blocks[i];
+      if (!block.visible) continue;
+      const dx = Math.abs(ball.position.x - block.position.x);
+      const dz = Math.abs(ball.position.z - block.position.z);
+      if (dx < 1.8 && dz < 1.1) {
+        // ヒット時
+        block.visible = false;
+        ballVelocity.z *= -1;
+        blockHit = true;
+        break;
+      }
+    }
+    // クリア判定
+    if (blocks.every(b => !b.visible)) {
+      isGameClear = true;
+      showMessage('クリア！');
+    }
+    // 下に落ちたらゲームオーバー
+    if (ball.position.z > 25) {
+      isGameOver = true;
+      showMessage('ゲームオーバー');
+    }
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    updateBall();
+    renderer.render(scene, camera);
+  }
+
+  // タップやクリックでリスタート
+  window.addEventListener('pointerdown', () => {
+    if (isGameOver || isGameClear) {
+      // ブロック復活
+      blocks.forEach(b => b.visible = true);
+      // ボールリセット
+      ball.position.set(0, 0, 18);
+      ballVelocity.x = 0.18 * (Math.random() > 0.5 ? 1 : -1);
+      ballVelocity.z = -0.22;
+      isGameOver = false;
+      isGameClear = false;
+      hideMessage();
+    }
+  });
 
 window.addEventListener('DOMContentLoaded', init3D);
