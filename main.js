@@ -141,7 +141,7 @@ function init3D() {
   // シーン
   scene = new THREE.Scene();
   // サイバー＆アイアンマン風の暗い青グラデ背景
-  scene.background = new THREE.Color(0x10131a);
+  scene.background = new THREE.Color(0x141a23);
 
   // カメラ
   camera = new THREE.PerspectiveCamera(
@@ -160,44 +160,38 @@ function init3D() {
   dirLight.position.set(0, 20, 20);
   scene.add(dirLight);
 
-  // 床（サイバーグリッド＋光るライン）
-  const floorGeo = new THREE.PlaneGeometry(30, 50, 30, 50);
+  // 床（上品な青グラデ＋控えめグリッド＋中央光ライン）
+  const floorGeo = new THREE.PlaneGeometry(30, 50, 1, 1);
   const floorMat = new THREE.MeshPhysicalMaterial({
-    color: 0x181c1f,
-    metalness: 0.9,
-    roughness: 0.12,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.05,
+    color: 0x0d2236,
+    metalness: 0.7,
+    roughness: 0.18,
+    clearcoat: 0.8,
+    clearcoatRoughness: 0.08,
     emissive: 0x003366,
-    emissiveIntensity: 0.45
+    emissiveIntensity: 0.18
   });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -2;
   scene.add(floor);
-  // グリッドヘルパー（サイバー感・強調）
-  const grid = new THREE.GridHelper(30, 30, 0x00e5ff, 0xff1744);
+  // 控えめなグリッド
+  const grid = new THREE.GridHelper(30, 10, 0x225577, 0x223344);
   grid.position.y = -1.98;
-  grid.material.opacity = 0.75;
+  grid.material.opacity = 0.22;
   grid.material.transparent = true;
-  grid.material.linewidth = 2;
   scene.add(grid);
-  // 光るライン（アークリアクター風・太く明るく）
-  const lineMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, linewidth: 8, transparent: true, opacity: 0.85 });
-  const points = [];
-  for (let i = -12; i <= 12; i += 6) {
-    points.push(new THREE.Vector3(i, -1.95, 20));
-    points.push(new THREE.Vector3(i, -1.95, -20));
-  }
-  for (let z = -20; z <= 20; z += 8) {
-    points.push(new THREE.Vector3(-12, -1.95, z));
-    points.push(new THREE.Vector3(12, -1.95, z));
-  }
-  const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
-  const lines = new THREE.LineSegments(lineGeo, lineMat);
-  scene.add(lines);
-  // アークリアクター風ライト（強調）
-  const arcLight = new THREE.PointLight(0x00e5ff, 2.5, 60, 2);
+  // 中央に光るライン
+  const lineMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, linewidth: 6, transparent: true, opacity: 0.55 });
+  const linePoints = [
+    new THREE.Vector3(0, -1.95, 24),
+    new THREE.Vector3(0, -1.95, -24)
+  ];
+  const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
+  const line = new THREE.Line(lineGeo, lineMat);
+  scene.add(line);
+  // アークリアクター風ライト（淡く）
+  const arcLight = new THREE.PointLight(0x00e5ff, 1.1, 30, 2);
   arcLight.position.set(0, 2, 20);
   scene.add(arcLight);
 
