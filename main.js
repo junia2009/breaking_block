@@ -113,7 +113,7 @@ function createElegantGradientTexture() {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
-  // 多重グラデーション
+  // 多重グラデーション（中央の水色丸を削除）
   const grad = ctx.createRadialGradient(
     size/2, size/2, size/10,
     size/2, size/2, size/2
@@ -125,15 +125,6 @@ function createElegantGradientTexture() {
   grad.addColorStop(1, '#090a18');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, size, size);
-  // 遠景に淡い光のリング
-  ctx.globalAlpha = 0.18;
-  ctx.beginPath();
-  ctx.arc(size/2, size/2+size*0.18, size*0.38, 0, 2*Math.PI);
-  ctx.fillStyle = '#00e5ff';
-  ctx.shadowColor = '#00e5ff';
-  ctx.shadowBlur = 80;
-  ctx.fill();
-  ctx.globalAlpha = 1.0;
   return new THREE.CanvasTexture(canvas);
 }
 
