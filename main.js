@@ -273,17 +273,16 @@ function init3D() {
     renderer.render(scene, camera);
   }
 
-  // タップやクリックでリスタート
+  // ゲームオーバー・クリア時にスタート画面へ戻す
   window.addEventListener('pointerdown', () => {
     if (isGameOver || isGameClear) {
-      // ブロック復活
-      blocks.forEach(b => b.visible = true);
-      // ボールリセット
-      ball.position.set(0, 0, 18);
-      ballVelocity.x = 0.18 * (Math.random() > 0.5 ? 1 : -1);
-      ballVelocity.z = -0.22;
-      isGameOver = false;
-      isGameClear = false;
+      // スタート画面再表示
+      const overlay = document.getElementById('start-overlay');
+      if (overlay) {
+        overlay.style.display = 'flex';
+        overlay.style.opacity = '1';
+        overlay.classList.add('active');
+      }
       hideMessage();
     }
   });
