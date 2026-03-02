@@ -1,16 +1,7 @@
 #game-version {
   position: absolute;
   top: 68px;
-  body {
-    margin: 0;
-    padding: 0;
-    background: radial-gradient(ellipse at center, #23272b 0%, #0d1012 100%);
-    color: #ffe082;
-    font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-  }
+}
   #game-container {
     width: 100vw;
     height: 100vh;
@@ -20,116 +11,81 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: relative;
-    background: none;
-    overflow: hidden;
-  }
-  #game-canvas {
-    background: #23272b;
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-radius: 18px;
-    box-shadow: 0 4px 32px #ff1744cc, 0 0 32px #00e5ff44;
-    border: 2.5px solid #ff1744;
-    z-index: 1;
-  }
-  z-index: 1010;
-}
-.start-title {
-  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
-  font-size: 2.8rem;
-  color: #ffe082;
-  letter-spacing: 0.18em;
-  text-shadow: 0 0 32px #ff1744, 0 0 64px #00e5ff, 0 2px 24px #000a;
-  margin-bottom: 0.5em;
-  position: relative;
-}
-.start-glow {
-  background: linear-gradient(90deg, #ffe082 30%, #ff1744 60%, #00e5ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-fill-color: transparent;
-  animation: glowMove 2.5s linear infinite;
-}
-.start-version {
-  color: #ffd700;
-  font-size: 1.1rem;
-  letter-spacing: 0.12em;
-  text-shadow: 0 2px 8px #000a, 0 0 8px #ffd70099;
-}
-#start-btn {
-  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
-  font-size: 1.5rem;
-  color: #fff;
-  background: linear-gradient(90deg, #ff1744 0%, #ffe082 100%);
-  border: none;
-  border-radius: 32px;
-  padding: 18px 64px;
-  box-shadow: 0 0 32px #ff1744cc, 0 0 32px #00e5ff44;
-  cursor: pointer;
-  letter-spacing: 0.18em;
-  transition: transform 0.15s, box-shadow 0.15s;
-  margin-top: 24px;
-}
-#start-btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 0 48px #ff1744cc, 0 0 48px #00e5ff88;
-}
-.start-arc {
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 340px; height: 340px;
-  border-radius: 50%;
-  border: 6px solid #00e5ff44;
-  box-shadow: 0 0 64px #ff1744, 0 0 128px #00e5ff88;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  animation: arcPulse 2.2s infinite cubic-bezier(.4,0,.2,1);
-  z-index: 1005;
-}
-/* スタート画面表示中はゲームタイトル・バージョン非表示 */
-#start-overlay {
-  /* ...既存... */
-}
-#game-ui {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  z-index: 10;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 32px 48px 0 48px;
-  pointer-events: none;
-}
-#game-ui h1 {
-  font-size: 2.2rem;
-  color: #ffe082;
-  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
-  letter-spacing: 0.15em;
-  text-shadow: 0 2px 16px #ff1744, 0 0 32px #00e5ff;
-  margin: 0;
-}
-#game-ui #game-version {
-  font-size: 1.2rem;
-  color: #ffd700;
-  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
-  letter-spacing: 0.12em;
-  text-shadow: 0 2px 8px #000a, 0 0 8px #ffd70099;
-  margin-top: 0.3em;
-}
-#start-overlay {
-  /* ...既存... */
-}
-#start-overlay.active ~ #game-ui {
-  display: none !important;
+    #game-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: none;
+      overflow: hidden;
+    }
+    #game-canvas {
+      background: #23272b;
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: 18px;
+      box-shadow: 0 4px 32px #ff1744cc, 0 0 32px #00e5ff44;
+      border: 2.5px solid #ff1744;
+      z-index: 1;
+    }
+    #start-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: radial-gradient(ellipse at center, #181c1f 60%, #0d1012 100%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .start-title {
+      font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+      font-size: 2.8rem;
+      color: #ffe082;
+      letter-spacing: 0.18em;
+      text-shadow: 0 0 32px #ff1744, 0 0 64px #00e5ff, 0 2px 24px #000a;
+      margin-bottom: 0.5em;
+      text-align: center;
+    }
+    .start-version {
+      color: #ffd700;
+      font-size: 1.1rem;
+      letter-spacing: 0.12em;
+      text-shadow: 0 2px 8px #000a, 0 0 8px #ffd70099;
+      margin-bottom: 2em;
+      text-align: center;
+    }
+    #start-btn {
+      font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+      font-size: 1.5rem;
+      color: #fff;
+      background: linear-gradient(90deg, #ff1744 0%, #ffe082 100%);
+      border: none;
+      border-radius: 32px;
+      padding: 18px 64px;
+      box-shadow: 0 0 32px #ff1744cc, 0 0 32px #00e5ff44;
+      cursor: pointer;
+      letter-spacing: 0.18em;
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin-top: 24px;
+      text-align: center;
+    }
+    #start-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 48px #ff1744cc, 0 0 48px #00e5ff88;
+    }
+    #start-btn:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 16px #ff1744cc, 0 0 16px #00e5ff44;
+    }   
 }
