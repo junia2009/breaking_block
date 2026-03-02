@@ -107,22 +107,20 @@ function setupPaddleControl() {
 // Three.jsによる3Dブロック崩しの初期化
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.min.js';
 
-// 洗練された多重グラデーション背景テクスチャ生成
-function createElegantGradientTexture() {
+// 宇宙（黒に近いグラデ）背景テクスチャ生成
+function createSpaceTexture() {
   const size = 1024;
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
-  // 多重グラデーション（中央の水色丸を削除）
+  // 黒に近いグラデーション
   const grad = ctx.createRadialGradient(
-    size/2, size/2, size/10,
+    size/2, size/2, size/8,
     size/2, size/2, size/2
   );
-  grad.addColorStop(0, '#232a4d');
-  grad.addColorStop(0.25, '#2e3a6d');
-  grad.addColorStop(0.5, '#3a2e6d');
-  grad.addColorStop(0.7, '#181a2d');
-  grad.addColorStop(1, '#090a18');
+  grad.addColorStop(0, '#181a22');
+  grad.addColorStop(0.5, '#10111a');
+  grad.addColorStop(1, '#000008');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, size, size);
   return new THREE.CanvasTexture(canvas);
@@ -161,34 +159,33 @@ function init3D() {
 
   // シーン
   scene = new THREE.Scene();
-  // 洗練された異世界感：多重グラデーション背景＋光のリング
-  scene.background = createElegantGradientTexture();
-  // 洗練された星パーティクル
-  const starCount = 36;
+  // 一面に広がる宇宙背景
+  scene.background = createSpaceTexture();
+  // 宇宙全体に星パーティクル
+  const starCount = 120;
   const starGeo = new THREE.BufferGeometry();
   const starPositions = [];
-  const starSizes = [];
   const starColors = [];
   for (let i = 0; i < starCount; i++) {
-    // 床の外側にランダム配置
-    const angle = Math.random() * Math.PI * 2;
-    const radius = 22 + Math.random() * 10;
-    const x = Math.cos(angle) * radius;
-    const z = Math.sin(angle) * radius;
-    const y = -1.5 + Math.random() * 2.5;
+    // 全体にランダム配置
+    const phi = Math.random() * Math.PI;
+    const theta = Math.random() * Math.PI * 2;
+    const r = 28 + Math.random() * 18;
+    const x = Math.sin(phi) * Math.cos(theta) * r;
+    const y = (Math.random() - 0.5) * 18;
+    const z = Math.sin(phi) * Math.sin(theta) * r;
     starPositions.push(x, y, z);
-    starSizes.push(0.18 + Math.random() * 0.22);
-    // 輝度ランダムな青白
+    // 輝度ランダムな白〜青白
     const c = 0.7 + Math.random() * 0.3;
     starColors.push(c, c, 1.0);
   }
   starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
   starGeo.setAttribute('color', new THREE.Float32BufferAttribute(starColors, 3));
   const starMat = new THREE.PointsMaterial({
-    size: 0.22,
+    size: 0.18,
     vertexColors: true,
     transparent: true,
-    opacity: 0.82,
+    opacity: 0.85,
     sizeAttenuation: true
   });
   const stars = new THREE.Points(starGeo, starMat);
