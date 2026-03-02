@@ -768,34 +768,45 @@ function onResize() {
   renderer.setSize(w, h);
   const aspect = w / h;
   camera.aspect = aspect;
+  let modeName = '';
 
   if (aspect < 0.55) {
     // 超縦長（スマホ縦画面）
     camera.fov = 75;
     camera.position.set(0, 17, 35);
+    modeName = '1: 超縦長 (aspect<0.55)';
   } else if (aspect < 0.75) {
     // 縦長（スマホ縦 or タブレット縦）
     camera.fov = 75;
     camera.position.set(0, 17, 30);
+    modeName = '2: 縦長 (aspect<0.75)';
   } else if (aspect < 1.0) {
     // やや縦長
     camera.fov = 70;
     camera.position.set(0, 18, 36);
+    modeName = '3: やや縦長 (aspect<1.0)';
   } else if (aspect < 1.4) {
     // ほぼ正方形〜やや横長
     camera.fov = 60;
     camera.position.set(0, 14, 30);
+    modeName = '4: やや横長 (aspect<1.4)';
   } else if (h < 420) {
     // スマホ横画面（高さが狭い）
     camera.fov = 62;
     camera.position.set(0, 15, 32);
+    modeName = '5: スマホ横 (h<420)';
   } else {
     // 横長（PC / タブレット横）
     camera.fov = 55;
     camera.position.set(0, 12, 26);
+    modeName = '6: PC横長';
   }
   camera.lookAt(0, 0, h < 420 ? 6 : 4);
   camera.updateProjectionMatrix();
+
+  // デバッグ表示
+  const modeEl = document.getElementById('camera-mode');
+  if (modeEl) modeEl.textContent = `CAM ${modeName} | ${w}x${h} (${aspect.toFixed(2)})`;
 
   // フォグを画面サイズに応じて調整（縦長ほど薄く＝遠くまで見える）
   if (scene.fog) {
