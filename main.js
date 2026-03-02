@@ -85,12 +85,27 @@ let blocks = [];
 
 function init3D() {
   // レンダラー
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setClearColor(0x222222, 1);
-  // 既存canvasを非表示
-  const oldCanvas = document.getElementById('game-canvas');
-  if (oldCanvas) oldCanvas.style.display = 'none';
+    // 既存canvasの上にThree.jsのcanvasを重ねる
+    const oldCanvas = document.getElementById('game-canvas');
+    if (oldCanvas) {
+      oldCanvas.style.background = '#23272b';
+      oldCanvas.style.display = 'block';
+      oldCanvas.style.position = 'absolute';
+      oldCanvas.style.top = '0';
+      oldCanvas.style.left = '0';
+      oldCanvas.style.width = '100%';
+      oldCanvas.style.height = '100%';
+      oldCanvas.style.zIndex = '1';
+    }
+    renderer.domElement.style.position = 'absolute';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.left = '0';
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.zIndex = '2';
   container.appendChild(renderer.domElement);
 
   // シーン

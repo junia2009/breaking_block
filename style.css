@@ -1,35 +1,44 @@
 #game-version {
   position: absolute;
   top: 68px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.2rem;
-  color: #ffd700;
-  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
-  letter-spacing: 0.12em;
-  text-shadow: 0 2px 8px #000a, 0 0 8px #ffd70099;
-  z-index: 11;
-  pointer-events: none;
-}
-/* --- スタート画面中央配置・重なり修正 --- */
-#start-overlay {
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background: radial-gradient(ellipse at center, #181c1f 60%, #0d1012 100%);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fadeIn 1.2s cubic-bezier(.4,0,.2,1);
-}
-.start-content {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
+  body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(ellipse at center, #23272b 0%, #0d1012 100%);
+    color: #ffe082;
+    font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+  #game-container {
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    min-width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: none;
+    overflow: hidden;
+  }
+  #game-canvas {
+    background: #23272b;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px #ff1744cc, 0 0 32px #00e5ff44;
+    border: 2.5px solid #ff1744;
+    z-index: 1;
+  }
   z-index: 1010;
 }
 .start-title {
