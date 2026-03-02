@@ -243,8 +243,8 @@ function init3D() {
   arcLight.position.set(0, 2, 20);
   scene.add(arcLight);
 
-  // パドル（細長いカプセル型サイバーバー）
-  const paddleGeo = new THREE.CapsuleGeometry(0.38, 5.2, 8, 32); // 細長いカプセル
+  // パドル（横長の細いカプセル型サイバーバー）
+  const paddleGeo = new THREE.CapsuleGeometry(0.28, 5.4, 8, 32); // 横長・細い
   const paddleMat = new THREE.MeshPhysicalMaterial({
     color: 0x0099ff,
     metalness: 0.85,
@@ -256,9 +256,10 @@ function init3D() {
   });
   paddle = new THREE.Mesh(paddleGeo, paddleMat);
   paddle.position.set(0, -1.15, 20);
+  paddle.rotation.z = Math.PI / 2; // 横向きに
   scene.add(paddle);
-  // 中央に光る細長いライン
-  const paddleLineGeo = new THREE.BoxGeometry(0.09, 0.22, 1.22);
+  // 中央に光る横長ライン
+  const paddleLineGeo = new THREE.BoxGeometry(5.2, 0.09, 1.22);
   const paddleLineMat = new THREE.MeshPhysicalMaterial({
     color: 0x00e5ff,
     metalness: 0.7,
