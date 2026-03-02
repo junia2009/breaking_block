@@ -95,7 +95,41 @@
   z-index: 1005;
 }
 /* スタート画面表示中はゲームタイトル・バージョン非表示 */
-#start-overlay:has(.start-content) ~ #game-version,
-#start-overlay:has(.start-content) ~ h1 {
+#start-overlay {
+  /* ...既存... */
+}
+#game-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 32px 48px 0 48px;
+  pointer-events: none;
+}
+#game-ui h1 {
+  font-size: 2.2rem;
+  color: #ffe082;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  letter-spacing: 0.15em;
+  text-shadow: 0 2px 16px #ff1744, 0 0 32px #00e5ff;
+  margin: 0;
+}
+#game-ui #game-version {
+  font-size: 1.2rem;
+  color: #ffd700;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  letter-spacing: 0.12em;
+  text-shadow: 0 2px 8px #000a, 0 0 8px #ffd70099;
+  margin-top: 0.3em;
+}
+#start-overlay {
+  /* ...既存... */
+}
+#start-overlay.active ~ #game-ui {
   display: none !important;
 }

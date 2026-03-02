@@ -3,9 +3,14 @@ window.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   const overlay = document.getElementById('start-overlay');
   if (startBtn && overlay) {
+    // 初期表示時はactiveクラスを付与
+    overlay.classList.add('active');
     startBtn.addEventListener('click', () => {
       overlay.style.opacity = '0';
+      overlay.classList.remove('active');
       setTimeout(() => { overlay.style.display = 'none'; }, 600);
+      // ゲーム本体の初期化をここで呼ぶ
+      init3D();
     });
   }
 });
