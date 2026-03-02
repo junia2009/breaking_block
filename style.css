@@ -1,3 +1,16 @@
+#game-version {
+  position: absolute;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  color: #ffd700;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  letter-spacing: 0.12em;
+  text-shadow: 0 2px 8px #000a, 0 0 8px #ffd70099;
+  z-index: 11;
+  pointer-events: none;
+}
 body {
   margin: 0;
   padding: 0;
