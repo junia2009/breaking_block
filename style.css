@@ -401,7 +401,9 @@ html, body {
 }
 
 /* ===== レスポンシブ ===== */
-@media (max-width: 600px) {
+
+/* スマホ縦画面 */
+@media (max-width: 600px) and (orientation: portrait) {
   .start-title {
     font-size: clamp(2.2rem, 12vw, 4rem);
   }
@@ -415,5 +417,55 @@ html, body {
   }
   #hud-score {
     font-size: 1.3rem;
+  }
+}
+
+/* スマホ横画面（高さが狭い） */
+@media (max-height: 500px) and (orientation: landscape) {
+  .start-content {
+    gap: 0;
+  }
+  .start-subtitle {
+    font-size: 0.55rem;
+    margin-bottom: 0.6rem;
+  }
+  .start-title {
+    font-size: clamp(1.6rem, 6vh, 2.5rem);
+    margin-bottom: 0.2rem;
+  }
+  .start-version {
+    font-size: 0.65rem;
+    margin-bottom: 0.4rem;
+  }
+  .start-description {
+    font-size: 0.75rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.4;
+  }
+  #start-btn {
+    padding: 10px 40px;
+    font-size: 0.8rem;
+  }
+  .start-controls {
+    margin-top: 0.8rem;
+    gap: 1rem;
+    font-size: 0.65rem;
+  }
+  .start-notice {
+    margin-top: 0.6rem;
+    font-size: 0.65rem;
+    padding: 4px 14px;
+  }
+  #hud {
+    padding: 6px 12px;
+  }
+  #hud-score {
+    font-size: 1.2rem;
+  }
+  .hud-label {
+    font-size: 0.5rem;
+  }
+  .life {
+    width: 8px; height: 8px;
   }
 }
