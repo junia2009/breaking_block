@@ -44,6 +44,24 @@ function setupPaddleControl() {
       paddle.position.x = Math.max(-14, Math.min(14, x * 14));
     }
   }, { passive: false });
+
+  // キーボード操作（左右）
+  let keyLeft = false, keyRight = false;
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'ArrowLeft') keyLeft = true;
+    if (e.code === 'ArrowRight') keyRight = true;
+  });
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'ArrowLeft') keyLeft = false;
+    if (e.code === 'ArrowRight') keyRight = false;
+  });
+
+  function movePaddleByKey() {
+    if (keyLeft) paddle.position.x = Math.max(-14, paddle.position.x - 0.5);
+    if (keyRight) paddle.position.x = Math.min(14, paddle.position.x + 0.5);
+    requestAnimationFrame(movePaddleByKey);
+  }
+  movePaddleByKey();
 }
 // Three.jsによる3Dブロック崩しの初期化
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.min.js';
