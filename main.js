@@ -140,6 +140,8 @@ function init3D() {
 
   // シーン
   scene = new THREE.Scene();
+  // サイバー＆アイアンマン風の暗い青グラデ背景
+  scene.background = new THREE.Color(0x181c1f);
 
   // カメラ
   camera = new THREE.PerspectiveCamera(
@@ -158,13 +160,45 @@ function init3D() {
   dirLight.position.set(0, 20, 20);
   scene.add(dirLight);
 
-  // 床
-  const floorGeo = new THREE.PlaneGeometry(30, 50);
-  const floorMat = new THREE.MeshPhongMaterial({ color: 0x333333 });
+  // 床（サイバーグリッド＋光るライン）
+  const floorGeo = new THREE.PlaneGeometry(30, 50, 30, 50);
+  const floorMat = new THREE.MeshPhysicalMaterial({
+    color: 0x181c1f,
+    metalness: 0.7,
+    roughness: 0.25,
+    clearcoat: 0.7,
+    clearcoatRoughness: 0.1,
+    emissive: 0x002244,
+    emissiveIntensity: 0.18
+  });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -2;
   scene.add(floor);
+  // グリッドヘルパー（サイバー感）
+  const grid = new THREE.GridHelper(30, 30, 0x00e5ff, 0x222233);
+  grid.position.y = -1.99;
+  grid.material.opacity = 0.35;
+  grid.material.transparent = true;
+  scene.add(grid);
+  // 光るライン（アークリアクター風）
+  const lineMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, linewidth: 2 });
+  const points = [];
+  for (let i = -12; i <= 12; i += 6) {
+    points.push(new THREE.Vector3(i, -1.98, 20));
+    points.push(new THREE.Vector3(i, -1.98, -20));
+  }
+  for (let z = -20; z <= 20; z += 8) {
+    points.push(new THREE.Vector3(-12, -1.98, z));
+    points.push(new THREE.Vector3(12, -1.98, z));
+  }
+  const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+  const lines = new THREE.LineSegments(lineGeo, lineMat);
+  scene.add(lines);
+  // アークリアクター風ライト
+  const arcLight = new THREE.PointLight(0x00e5ff, 1.2, 30, 2);
+  arcLight.position.set(0, 0, 20);
+  scene.add(arcLight);
 
   // パドル（アイアンマンの胸アーク風：青メタリック）
   const paddleGeo = new THREE.BoxGeometry(6, 0.7, 1.2);
