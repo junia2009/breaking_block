@@ -265,4 +265,4 @@ function init3D() {
     }
   });
 
-window.addEventListener('DOMContentLoaded', init3D);
+// window.addEventListener('DOMContentLoaded', init3D); // スタート画面からのみ呼び出す
