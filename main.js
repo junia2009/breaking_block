@@ -781,8 +781,11 @@ function updateHUD() {
   // ライフ表示
   const lifeDots = document.querySelectorAll('.life');
   lifeDots.forEach((dot, i) => {
-    dot.classList.remove('lost');
-    dot.classList.toggle('active', i < lives);
+    dot.classList.remove('lost', 'active');
+    dot.style.animation = 'none';
+    void dot.offsetWidth; // 強制リフロー（Safari対策）
+    dot.style.animation = '';
+    if (i < lives) dot.classList.add('active');
   });
   // コンボ
   if (combo >= 2) {
