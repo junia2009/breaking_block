@@ -771,8 +771,8 @@ function onResize() {
 
   if (aspect < 0.55) {
     // 超縦長（スマホ縦画面）
-    camera.fov = 75;
-    camera.position.set(0, 16, 32);
+    camera.fov = 73;
+    camera.position.set(0, 16, 35);
   } else if (aspect < 0.75) {
     // 縦長（スマホ縦 or タブレット縦）
     camera.fov = 70;
