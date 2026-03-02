@@ -762,51 +762,54 @@ function animate() {
 //  リサイズ
 // ================================================================
 function onResize() {
-  if (!renderer || !camera) return;
   const w = container.clientWidth;
   const h = container.clientHeight;
-  renderer.setSize(w, h);
   const aspect = w / h;
-  camera.aspect = aspect;
   let modeName = '';
 
   if (aspect < 0.55) {
-    // 超縦長（スマホ縦画面）
-    camera.fov = 75;
-    camera.position.set(0, 17, 35);
     modeName = '1: 超縦長 (aspect<0.55)';
   } else if (aspect < 0.75) {
-    // 縦長（スマホ縦 or タブレット縦）
-    camera.fov = 75;
-    camera.position.set(0, 17, 30);
     modeName = '2: 縦長 (aspect<0.75)';
   } else if (aspect < 1.0) {
-    // やや縦長
-    camera.fov = 70;
-    camera.position.set(0, 18, 36);
     modeName = '3: やや縦長 (aspect<1.0)';
   } else if (aspect < 1.4) {
-    // ほぼ正方形〜やや横長
-    camera.fov = 60;
-    camera.position.set(0, 14, 30);
     modeName = '4: やや横長 (aspect<1.4)';
   } else if (h < 420) {
-    // スマホ横画面（高さが狭い）
-    camera.fov = 62;
-    camera.position.set(0, 15, 32);
     modeName = '5: スマホ横 (h<420)';
   } else {
-    // 横長（PC / タブレット横）
+    modeName = '6: PC横長';
+  }
+
+  // デバッグ表示（カメラ未生成でも表示）
+  const modeEl = document.getElementById('camera-mode');
+  if (modeEl) modeEl.textContent = `CAM ${modeName} | ${w}x${h} (${aspect.toFixed(2)})`;
+
+  if (!renderer || !camera) return;
+  renderer.setSize(w, h);
+  camera.aspect = aspect;
+
+  if (aspect < 0.55) {
+    camera.fov = 75;
+    camera.position.set(0, 17, 35);
+  } else if (aspect < 0.75) {
+    camera.fov = 75;
+    camera.position.set(0, 17, 30);
+  } else if (aspect < 1.0) {
+    camera.fov = 70;
+    camera.position.set(0, 18, 36);
+  } else if (aspect < 1.4) {
+    camera.fov = 60;
+    camera.position.set(0, 14, 30);
+  } else if (h < 420) {
+    camera.fov = 62;
+    camera.position.set(0, 15, 32);
+  } else {
     camera.fov = 55;
     camera.position.set(0, 12, 26);
-    modeName = '6: PC横長';
   }
   camera.lookAt(0, 0, h < 420 ? 6 : 4);
   camera.updateProjectionMatrix();
-
-  // デバッグ表示
-  const modeEl = document.getElementById('camera-mode');
-  if (modeEl) modeEl.textContent = `CAM ${modeName} | ${w}x${h} (${aspect.toFixed(2)})`;
 
   // フォグを画面サイズに応じて調整（縦長ほど薄く＝遠くまで見える）
   if (scene.fog) {
@@ -820,3 +823,13 @@ function onResize() {
 function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
+
+// ページ読み込み時にデバッグ表示を即更新
+onResize();
+window.addEventListener('resize', () => {
+  const modeEl = document.getElementById('camera-mode');
+  if (modeEl && (!renderer || !camera)) {
+    // ゲーム開始前でもデバッグ表示を更新
+    onResize();
+  }
+});
