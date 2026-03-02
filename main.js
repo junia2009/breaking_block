@@ -737,10 +737,12 @@ function resetGame() {
 
 // ステージクリア → 次ステージへ
 function advanceStage() {
+  paused = true; // 遷移中はゲーム停止
   currentStage++;
   if (currentStage >= STAGES.length) {
     // 全ステージクリア！
     gameClear = true;
+    paused = false;
     showMessage('ALL CLEAR!', `THE FORCE IS STRONG WITH YOU — SCORE: ${score}`, true);
     return;
   }
@@ -750,6 +752,7 @@ function advanceStage() {
     combo = 0;
     updateHUD();
     launchBall();
+    paused = false; // 遷移完了、ゲーム再開
   });
 }
 
