@@ -765,26 +765,6 @@ function onResize() {
   const w = container.clientWidth;
   const h = container.clientHeight;
   const aspect = w / h;
-  let modeName = '';
-
-  if (aspect < 0.55) {
-    modeName = '1: 超縦長 (aspect<0.55)';
-  } else if (aspect < 0.75) {
-    modeName = '2: 縦長 (aspect<0.75)';
-  } else if (aspect < 1.0) {
-    modeName = '3: やや縦長 (aspect<1.0)';
-  } else if (aspect < 1.4) {
-    modeName = '4: やや横長 (aspect<1.4)';
-  } else if (h < 420) {
-    modeName = '5: スマホ横 (h<420)';
-  } else {
-    modeName = '6: PC横長';
-  }
-
-  // デバッグ表示（カメラ未生成でも表示）
-  const modeEl = document.getElementById('camera-mode');
-  if (modeEl) modeEl.textContent = `CAM ${modeName} | ${w}x${h} (${aspect.toFixed(2)})`;
-
   if (!renderer || !camera) return;
   renderer.setSize(w, h);
   camera.aspect = aspect;
@@ -824,12 +804,4 @@ function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
-// ページ読み込み時にデバッグ表示を即更新
-onResize();
-window.addEventListener('resize', () => {
-  const modeEl = document.getElementById('camera-mode');
-  if (modeEl && (!renderer || !camera)) {
-    // ゲーム開始前でもデバッグ表示を更新
-    onResize();
-  }
-});
+
