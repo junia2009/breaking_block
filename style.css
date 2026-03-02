@@ -1,3 +1,45 @@
+#body, body {
+  min-height: 100vh;
+  min-width: 100vw;
+  margin: 0;
+  padding: 0;
+  /* サイバー＆アイアンマン風グラデーション背景 */
+  background:
+    repeating-linear-gradient(135deg, #222 0 2px, transparent 2px 40px),
+    repeating-linear-gradient(45deg, #222 0 2px, transparent 2px 40px),
+    radial-gradient(ellipse at 50% 30%, #23272b 0%, #181c1f 60%, #0d1012 100%),
+    linear-gradient(120deg, #ff1744 0%, #ffe082 30%, #00e5ff 100%);
+  background-blend-mode: overlay, overlay, normal, normal;
+  position: relative;
+  overflow: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  /* アイアンマンのアーク・リアクター風の光 */
+  background:
+    radial-gradient(circle at 50% 80%, #00e5ff55 0%, #00e5ff00 60%),
+    radial-gradient(circle at 50% 20%, #ff174455 0%, #ff174400 60%),
+    radial-gradient(circle at 80% 50%, #ffe08244 0%, #ffe08200 60%);
+  mix-blend-mode: lighten;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  /* サイバーな光るライン */
+  background:
+    linear-gradient(90deg, transparent 95%, #00e5ff33 100%),
+    linear-gradient(180deg, transparent 90%, #ff174433 100%);
+  mix-blend-mode: screen;
+}
 #game-version {
   position: absolute;
   top: 68px;
