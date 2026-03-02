@@ -243,20 +243,36 @@ function init3D() {
   arcLight.position.set(0, 2, 20);
   scene.add(arcLight);
 
-  // パドル（アイアンマンの胸アーク風：青メタリック）
-  const paddleGeo = new THREE.BoxGeometry(6, 0.7, 1.2);
+  // パドル（洗練サイバー：カプセル型＋青グラデ＋中央光ライン）
+  // カプセル型本体
+  const paddleGeo = new THREE.CapsuleGeometry(2.7, 2.6, 8, 32); // 長さ6相当
   const paddleMat = new THREE.MeshPhysicalMaterial({
-    color: 0x00e5ff,
-    metalness: 0.7,
-    roughness: 0.2,
-    clearcoat: 0.7,
-    clearcoatRoughness: 0.1,
-    emissive: 0x00e5ff,
-    emissiveIntensity: 0.25
+    color: 0x0099ff,
+    metalness: 0.85,
+    roughness: 0.18,
+    clearcoat: 0.9,
+    clearcoatRoughness: 0.05,
+    emissive: 0x003366,
+    emissiveIntensity: 0.18
   });
   paddle = new THREE.Mesh(paddleGeo, paddleMat);
-  paddle.position.set(0, -1.5, 20);
+  paddle.position.set(0, -1.15, 20);
+  paddle.scale.set(1.1, 0.38, 1.0);
   scene.add(paddle);
+  // 中央に光るライン
+  const paddleLineGeo = new THREE.BoxGeometry(0.18, 0.42, 1.22);
+  const paddleLineMat = new THREE.MeshPhysicalMaterial({
+    color: 0x00e5ff,
+    metalness: 0.7,
+    roughness: 0.12,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.7,
+    transparent: true,
+    opacity: 0.85
+  });
+  const paddleLine = new THREE.Mesh(paddleLineGeo, paddleLineMat);
+  paddleLine.position.set(0, -1.15, 20.62);
+  scene.add(paddleLine);
 
   // ボール（紺色・発光なし）
   const ballGeo = new THREE.SphereGeometry(0.6, 32, 32);
