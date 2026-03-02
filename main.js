@@ -771,12 +771,12 @@ function onResize() {
 
   if (aspect < 0.55) {
     // 超縦長（スマホ縦画面）
-    camera.fov = 90;
-    camera.position.set(0, 24, 48);
+    camera.fov = 75;
+    camera.position.set(0, 16, 32);
   } else if (aspect < 0.75) {
     // 縦長（スマホ縦 or タブレット縦）
-    camera.fov = 82;
-    camera.position.set(0, 22, 44);
+    camera.fov = 70;
+    camera.position.set(0, 15, 30);
   } else if (aspect < 1.0) {
     // やや縦長
     camera.fov = 70;
