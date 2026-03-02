@@ -16,7 +16,7 @@
       <div class="start-content">
         <div class="start-subtitle">A LONG TIME AGO IN A GALAXY FAR, FAR AWAY...</div>
         <div class="start-title">STAR<br>BREAKER</div>
-        <div class="start-version">EPISODE III — ver 3.1.0</div>
+        <div class="start-version">EPISODE III — ver 3.2.0</div>
         <div class="start-description">銀河に散らばるブロックを<br>すべて破壊せよ</div>
         <button id="start-btn">
           <span class="btn-icon">▶</span>
@@ -36,6 +36,8 @@
         <div id="hud-score">0</div>
       </div>
       <div id="hud-center">
+        <div id="hud-stage">STAGE 1</div>
+        <div id="hud-stage-name"></div>
         <div id="hud-combo" class="hidden">COMBO x<span id="combo-count">2</span></div>
       </div>
       <div id="hud-right">
@@ -46,6 +48,13 @@
           <span class="life active"></span>
         </div>
       </div>
+    </div>
+
+    <!-- ステージ遷移 -->
+    <div id="stage-transition">
+      <div class="stage-num"></div>
+      <div class="stage-planet"></div>
+      <div class="stage-desc"></div>
     </div>
 
     <!-- ゲームメッセージ -->

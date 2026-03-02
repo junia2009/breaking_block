@@ -11,8 +11,6 @@ const PADDLE_H = 0.35;
 const BALL_R   = 0.45;
 const BALL_SPEED_INIT = 0.26;
 const BALL_SPEED_MAX  = 0.45;
-const BLOCK_ROWS = 5;
-const BLOCK_COLS = 7;
 const BLOCK_W   = 3.0;
 const BLOCK_H   = 1.2;
 const BLOCK_D   = 1.0;
@@ -23,6 +21,116 @@ const WALL_TOP   = -FIELD_D / 2 + 2;
 const PADDLE_Z   =  FIELD_D / 2 - 5;
 const DEAD_Z     =  FIELD_D / 2 + 2;
 const MAX_LIVES  = 3;
+
+// ─── ステージ定義 ────────────────────────────────
+const STAGES = [
+  {
+    name: 'TATOOINE', desc: '砂漠の惑星', cols: 7, rows: 4,
+    speed: 0.26, maxSpeed: 0.40,
+    colors: [
+      { color: 0xddb866, emissive: 0x886633 },
+      { color: 0xccaa55, emissive: 0x775522 },
+      { color: 0xeebb55, emissive: 0x997733 },
+      { color: 0xbb9944, emissive: 0x664411 },
+    ],
+    layout: 'grid',
+    durableRate: 0,
+  },
+  {
+    name: 'HOTH', desc: '氷の惑星', cols: 7, rows: 5,
+    speed: 0.27, maxSpeed: 0.42,
+    colors: [
+      { color: 0x88ccff, emissive: 0x3366aa },
+      { color: 0xaaddff, emissive: 0x4477bb },
+      { color: 0x77bbee, emissive: 0x225599 },
+      { color: 0x99ccee, emissive: 0x3366aa },
+      { color: 0x66aadd, emissive: 0x114488 },
+    ],
+    layout: 'grid',
+    durableRate: 0.1,
+  },
+  {
+    name: 'DAGOBAH', desc: '沼地の惑星', cols: 7, rows: 5,
+    speed: 0.28, maxSpeed: 0.43,
+    colors: [
+      { color: 0x44aa44, emissive: 0x226622 },
+      { color: 0x55bb55, emissive: 0x337733 },
+      { color: 0x338833, emissive: 0x115511 },
+      { color: 0x66cc66, emissive: 0x448844 },
+      { color: 0x2a7a2a, emissive: 0x104410 },
+    ],
+    layout: 'checker',
+    durableRate: 0.15,
+  },
+  {
+    name: 'CLOUD CITY', desc: '雲の都市', cols: 7, rows: 5,
+    speed: 0.29, maxSpeed: 0.44,
+    colors: [
+      { color: 0xcc88ff, emissive: 0x6633aa },
+      { color: 0xffcc44, emissive: 0xaa8811 },
+      { color: 0xbb77ee, emissive: 0x5522aa },
+      { color: 0xeebb33, emissive: 0x997711 },
+      { color: 0xaa66dd, emissive: 0x441199 },
+    ],
+    layout: 'diamond',
+    durableRate: 0.2,
+  },
+  {
+    name: 'ENDOR', desc: '森林の衛星', cols: 7, rows: 5,
+    speed: 0.30, maxSpeed: 0.45,
+    colors: [
+      { color: 0x558833, emissive: 0x334411 },
+      { color: 0x886644, emissive: 0x553311 },
+      { color: 0x66aa44, emissive: 0x447722 },
+      { color: 0x775533, emissive: 0x442200 },
+      { color: 0x44882a, emissive: 0x225511 },
+    ],
+    layout: 'pyramid',
+    durableRate: 0.25,
+  },
+  {
+    name: 'MUSTAFAR', desc: '炎の惑星', cols: 7, rows: 6,
+    speed: 0.31, maxSpeed: 0.46,
+    colors: [
+      { color: 0xff4422, emissive: 0xcc1100 },
+      { color: 0xff6600, emissive: 0xcc3300 },
+      { color: 0xff3311, emissive: 0xbb0000 },
+      { color: 0xee5500, emissive: 0xbb2200 },
+      { color: 0xff2200, emissive: 0xaa0000 },
+      { color: 0xdd4400, emissive: 0x991100 },
+    ],
+    layout: 'cross',
+    durableRate: 0.3,
+  },
+  {
+    name: 'SCARIF', desc: '熱帯の惑星', cols: 7, rows: 6,
+    speed: 0.32, maxSpeed: 0.47,
+    colors: [
+      { color: 0x33bbdd, emissive: 0x117799 },
+      { color: 0xeedd66, emissive: 0xaa9933 },
+      { color: 0x22aacc, emissive: 0x006688 },
+      { color: 0xddcc55, emissive: 0x998822 },
+      { color: 0x44ccee, emissive: 0x228899 },
+      { color: 0xccbb44, emissive: 0x887711 },
+    ],
+    layout: 'inverted',
+    durableRate: 0.35,
+  },
+  {
+    name: 'DEATH STAR', desc: '最終決戦', cols: 7, rows: 6,
+    speed: 0.33, maxSpeed: 0.48,
+    colors: [
+      { color: 0xff3333, emissive: 0xcc0000 },
+      { color: 0xaabbcc, emissive: 0x556688 },
+      { color: 0xff4444, emissive: 0xbb0000 },
+      { color: 0x7799bb, emissive: 0x445566 },
+      { color: 0xff3333, emissive: 0xcc0000 },
+      { color: 0x556677, emissive: 0x334455 },
+    ],
+    layout: 'fortress',
+    durableRate: 0.45,
+  },
+];
 
 // ─── カラーパレット ──────────────────────────────
 const C = {
@@ -44,6 +152,9 @@ let gameClear = false;
 let score     = 0;
 let combo     = 0;
 let lives     = MAX_LIVES;
+let currentStage = 0;
+let stageSpeed   = BALL_SPEED_INIT;
+let stageMaxSpeed = BALL_SPEED_MAX;
 
 // ─── Three.js 変数 ───────────────────────────────
 let renderer, scene, camera, clock;
@@ -60,12 +171,15 @@ const overlay    = document.getElementById('start-overlay');
 const startBtn   = document.getElementById('start-btn');
 const hud        = document.getElementById('hud');
 const hudScore   = document.getElementById('hud-score');
+const hudStage   = document.getElementById('hud-stage');
+const hudStageName = document.getElementById('hud-stage-name');
 const hudCombo   = document.getElementById('hud-combo');
 const comboCount = document.getElementById('combo-count');
 const msgBox     = document.getElementById('game-message');
 const msgTitle   = document.getElementById('msg-title');
 const msgSub     = document.getElementById('msg-sub');
 const msgBtn     = document.getElementById('msg-btn');
+const stageTransition = document.getElementById('stage-transition');
 
 // ================================================================
 //  スタート画面
@@ -146,6 +260,7 @@ function initGame() {
   createBall();
 
   // ─ ブロック ─
+  currentStage = 0;
   createBlocks();
 
   // ─ 操作 ─
@@ -157,6 +272,9 @@ function initGame() {
     setTimeout(onResize, 150);  // 回転アニメ完了後に再計算
   });
   onResize();
+
+  // ─ HUD初期化 ─
+  updateHUD();
 
   // ─ ボール初期速度 ─
   launchBall();
@@ -369,30 +487,39 @@ function createBall() {
 //  ブロック
 // ================================================================
 function createBlocks() {
+  // 既存ブロックをシーンから除去
+  blocks.forEach(b => {
+    scene.remove(b);
+    b.geometry.dispose();
+    b.material.dispose();
+  });
   blocks = [];
-  const totalW = BLOCK_COLS * (BLOCK_W + BLOCK_GAP) - BLOCK_GAP;
+
+  const stage = STAGES[currentStage];
+  const cols = stage.cols;
+  const rows = stage.rows;
+  const totalW = cols * (BLOCK_W + BLOCK_GAP) - BLOCK_GAP;
   const startX = -totalW / 2 + BLOCK_W / 2;
   const startZ = WALL_TOP + 5;
 
-  // 色パターン — 帝国カラー（行ごとに変化）
-  const rowColors = [
-    { color: 0xff3333, emissive: 0xcc0000, name: 'red'  },    // 赤
-    { color: 0xaabbcc, emissive: 0x556688, name: 'grey' },    // 帝国グレー
-    { color: 0xff4444, emissive: 0xbb0000, name: 'red'  },    // 赤
-    { color: 0x7799bb, emissive: 0x445566, name: 'steel' },   // スチール
-    { color: 0x556677, emissive: 0x334455, name: 'dark' },    // ダーク
-  ];
+  // レイアウトマップ生成（1=通常, 2=耐久, 0=空）
+  const map = generateLayout(stage.layout, rows, cols, stage.durableRate);
 
-  for (let r = 0; r < BLOCK_ROWS; r++) {
-    const rc = rowColors[r % rowColors.length];
-    for (let c = 0; c < BLOCK_COLS; c++) {
+  for (let r = 0; r < rows; r++) {
+    const rc = stage.colors[r % stage.colors.length];
+    for (let c = 0; c < cols; c++) {
+      const cell = map[r][c];
+      if (cell === 0) continue;
+
+      const isDurable = cell >= 2;
+      const hp = isDurable ? cell : 1;
       const geo = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
       const mat = new THREE.MeshPhysicalMaterial({
-        color: rc.color,
-        metalness: 0.85,
-        roughness: 0.15,
-        emissive: rc.emissive,
-        emissiveIntensity: 0.45,
+        color: isDurable ? 0x888899 : rc.color,
+        metalness: isDurable ? 0.95 : 0.85,
+        roughness: isDurable ? 0.1 : 0.15,
+        emissive: isDurable ? 0x334455 : rc.emissive,
+        emissiveIntensity: isDurable ? 0.6 : 0.45,
         clearcoat: 0.5,
       });
       const mesh = new THREE.Mesh(geo, mat);
@@ -401,23 +528,136 @@ function createBlocks() {
         -0.3,
         startZ + r * (BLOCK_D + BLOCK_GAP + 0.2),
       );
-      mesh.userData = { row: r, col: c, points: (BLOCK_ROWS - r) * 10 };
+      mesh.userData = {
+        row: r, col: c,
+        points: (rows - r) * 10 * (isDurable ? 3 : 1),
+        hp: hp,
+        maxHp: hp,
+        originalColor: isDurable ? 0x888899 : rc.color,
+        originalEmissive: isDurable ? 0x334455 : rc.emissive,
+      };
       scene.add(mesh);
       blocks.push(mesh);
 
       // 上面にうっすら光るエッジ
+      const edgeColor = isDurable ? 0xff6644 : C.blue;
       const edgeGeo = new THREE.BoxGeometry(BLOCK_W + 0.05, 0.02, BLOCK_D + 0.05);
       const edgeMat = new THREE.MeshBasicMaterial({
-        color: C.blue,
+        color: edgeColor,
         transparent: true,
-        opacity: 0.18,
+        opacity: isDurable ? 0.35 : 0.18,
         depthWrite: false,
       });
       const edge = new THREE.Mesh(edgeGeo, edgeMat);
       edge.position.y = BLOCK_H / 2;
       mesh.add(edge);
+
+      // 耐久ブロックにマーク表示
+      if (isDurable) {
+        const markGeo = new THREE.BoxGeometry(BLOCK_W * 0.3, 0.03, BLOCK_D * 0.3);
+        const markMat = new THREE.MeshBasicMaterial({
+          color: 0xff4422,
+          transparent: true,
+          opacity: 0.5,
+          depthWrite: false,
+        });
+        const mark = new THREE.Mesh(markGeo, markMat);
+        mark.position.y = BLOCK_H / 2 + 0.02;
+        mesh.add(mark);
+      }
     }
   }
+
+  // ステージ速度設定
+  stageSpeed = stage.speed;
+  stageMaxSpeed = stage.maxSpeed;
+}
+
+// レイアウト生成
+function generateLayout(type, rows, cols, durableRate) {
+  const map = [];
+  for (let r = 0; r < rows; r++) {
+    map[r] = [];
+    for (let c = 0; c < cols; c++) {
+      map[r][c] = 1;
+    }
+  }
+
+  switch (type) {
+    case 'grid':
+      // そのまま全ブロック
+      break;
+
+    case 'checker':
+      // チェッカーパターン（互い違い）
+      for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++)
+          if ((r + c) % 2 === 1) map[r][c] = 0;
+      break;
+
+    case 'diamond':
+      // ひし形
+      for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++) {
+          const cr = Math.floor(rows / 2), cc = Math.floor(cols / 2);
+          if (Math.abs(r - cr) + Math.abs(c - cc) > Math.max(cr, cc))
+            map[r][c] = 0;
+        }
+      break;
+
+    case 'pyramid':
+      // ピラミッド（上から狭くなる）
+      for (let r = 0; r < rows; r++) {
+        const width = cols - r * 1;
+        const start = Math.floor((cols - width) / 2);
+        for (let c = 0; c < cols; c++)
+          if (c < start || c >= start + width) map[r][c] = 0;
+      }
+      break;
+
+    case 'cross':
+      // 十字型
+      for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++) {
+          const cc = Math.floor(cols / 2);
+          const cr = Math.floor(rows / 2);
+          if (Math.abs(c - cc) > 1 && Math.abs(r - cr) > 1)
+            map[r][c] = 0;
+        }
+      break;
+
+    case 'inverted':
+      // 逆ピラミッド
+      for (let r = 0; r < rows; r++) {
+        const width = r + 3;
+        const capped = Math.min(width, cols);
+        const start = Math.floor((cols - capped) / 2);
+        for (let c = 0; c < cols; c++)
+          if (c < start || c >= start + capped) map[r][c] = 0;
+      }
+      break;
+
+    case 'fortress':
+      // 要塞型（外周＋中央）
+      for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++) {
+          const isEdge = r === 0 || r === rows - 1 || c === 0 || c === cols - 1;
+          const isCenter = Math.abs(c - Math.floor(cols / 2)) <= 1 &&
+                           Math.abs(r - Math.floor(rows / 2)) <= 1;
+          if (!isEdge && !isCenter) map[r][c] = 0;
+        }
+      break;
+  }
+
+  // 耐久ブロック配置
+  if (durableRate > 0) {
+    for (let r = 0; r < rows; r++)
+      for (let c = 0; c < cols; c++)
+        if (map[r][c] === 1 && Math.random() < durableRate)
+          map[r][c] = 2; // HP2
+  }
+
+  return map;
 }
 
 // ================================================================
@@ -471,17 +711,18 @@ function launchBall() {
   ball.position.set(paddle.position.x, -0.8, PADDLE_Z - 2);
   const angle = (Math.random() - 0.5) * 0.8 - Math.PI / 2; // ほぼ上向き
   ballVel.set(
-    Math.cos(angle) * BALL_SPEED_INIT,
+    Math.cos(angle) * stageSpeed,
     0,
-    Math.sin(angle) * BALL_SPEED_INIT,
+    Math.sin(angle) * stageSpeed,
   );
   // Z方向は必ず奥へ
   if (ballVel.z > 0) ballVel.z *= -1;
 }
 
 function resetGame() {
-  // ブロック復活
-  blocks.forEach(b => { b.visible = true; });
+  // ステージリセット
+  currentStage = 0;
+  createBlocks();
   // ステート
   score     = 0;
   combo     = 0;
@@ -494,11 +735,46 @@ function resetGame() {
   hud.classList.add('visible');
 }
 
+// ステージクリア → 次ステージへ
+function advanceStage() {
+  currentStage++;
+  if (currentStage >= STAGES.length) {
+    // 全ステージクリア！
+    gameClear = true;
+    showMessage('ALL CLEAR!', `THE FORCE IS STRONG WITH YOU — SCORE: ${score}`, true);
+    return;
+  }
+  // ステージ遷移演出
+  showStageTransition(() => {
+    createBlocks();
+    combo = 0;
+    updateHUD();
+    launchBall();
+  });
+}
+
+// ステージ遷移演出
+function showStageTransition(callback) {
+  const stage = STAGES[currentStage];
+  stageTransition.querySelector('.stage-num').textContent = `STAGE ${currentStage + 1}`;
+  stageTransition.querySelector('.stage-planet').textContent = stage.name;
+  stageTransition.querySelector('.stage-desc').textContent = stage.desc;
+  stageTransition.classList.add('active');
+
+  setTimeout(() => {
+    stageTransition.classList.remove('active');
+    callback();
+  }, 2200);
+}
+
 // ================================================================
 //  HUD 更新
 // ================================================================
 function updateHUD() {
   hudScore.textContent = score;
+  // ステージ表示
+  hudStage.textContent = `STAGE ${currentStage + 1}`;
+  hudStageName.textContent = STAGES[currentStage].name;
   // ライフ表示
   const lifeDots = document.querySelectorAll('.life');
   lifeDots.forEach((dot, i) => {
@@ -650,9 +926,9 @@ function updateBall() {
     ballVel.x += offset * 0.08;
     // 速度上限
     const spd = Math.sqrt(ballVel.x ** 2 + ballVel.z ** 2);
-    if (spd > BALL_SPEED_MAX) {
-      ballVel.x *= BALL_SPEED_MAX / spd;
-      ballVel.z *= BALL_SPEED_MAX / spd;
+    if (spd > stageMaxSpeed) {
+      ballVel.x *= stageMaxSpeed / spd;
+      ballVel.z *= stageMaxSpeed / spd;
     }
     combo = 0; // パドルに戻るとコンボリセット
     updateHUD();
@@ -667,24 +943,47 @@ function updateBall() {
     const dx = Math.abs(ball.position.x - blk.position.x);
     const dz = Math.abs(ball.position.z - blk.position.z);
     if (dx < BLOCK_W / 2 + BALL_R * 0.7 && dz < BLOCK_D / 2 + BALL_R * 0.7) {
-      // 破壊
-      blk.visible = false;
       // 反射方向決定
       if (dx / (BLOCK_W / 2) > dz / (BLOCK_D / 2)) {
         ballVel.x *= -1;
       } else {
         ballVel.z *= -1;
       }
-      // スコア & コンボ
-      combo++;
-      const pts = blk.userData.points * (combo >= 2 ? combo : 1);
-      score += pts;
+
+      // HP減少
+      blk.userData.hp--;
+      if (blk.userData.hp <= 0) {
+        // 破壊
+        blk.visible = false;
+        // スコア & コンボ
+        combo++;
+        const pts = blk.userData.points * (combo >= 2 ? combo : 1);
+        score += pts;
+        // パーティクル
+        spawnParticles(blk.position.clone(), blk.material.color.getHex(), 14);
+      } else {
+        // 耐久ブロック：ダメージ表現（色を変えてフラッシュ）
+        blk.material.color.setHex(0xff6644);
+        blk.material.emissive.setHex(0xff2200);
+        setTimeout(() => {
+          if (blk.userData.hp > 0) {
+            // 少しダメージを受けた色に変化
+            blk.material.color.setHex(
+              lerpColor(blk.userData.originalColor, 0xff4422, 1 - blk.userData.hp / blk.userData.maxHp)
+            );
+            blk.material.emissive.setHex(blk.userData.originalEmissive);
+          }
+        }, 100);
+        // ヒットエフェクト
+        spawnParticles(blk.position.clone(), 0xff6644, 6);
+        combo++;
+        score += 5 * (combo >= 2 ? combo : 1);
+      }
+
       updateHUD();
-      // パーティクル
-      spawnParticles(blk.position.clone(), blk.material.color.getHex(), 14);
       // 少し加速
       const spd = Math.sqrt(ballVel.x ** 2 + ballVel.z ** 2);
-      const newSpd = Math.min(spd * 1.01, BALL_SPEED_MAX);
+      const newSpd = Math.min(spd * 1.01, stageMaxSpeed);
       ballVel.multiplyScalar(newSpd / spd);
       break; // 1フレーム1ブロック
     }
@@ -692,8 +991,7 @@ function updateBall() {
 
   // クリア判定
   if (blocks.every(b => !b.visible)) {
-    gameClear = true;
-    showMessage('VICTORY', `THE FORCE IS WITH YOU — SCORE: ${score}`, true);
+    advanceStage();
   }
 
   // 落下 → ライフ減少
@@ -802,6 +1100,16 @@ function onResize() {
 // ================================================================
 function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
+}
+
+// 色補間（hex同士を0〜1のtで混ぜる）
+function lerpColor(c1, c2, t) {
+  const r1 = (c1 >> 16) & 0xff, g1 = (c1 >> 8) & 0xff, b1 = c1 & 0xff;
+  const r2 = (c2 >> 16) & 0xff, g2 = (c2 >> 8) & 0xff, b2 = c2 & 0xff;
+  const r = Math.round(r1 + (r2 - r1) * t);
+  const g = Math.round(g1 + (g2 - g1) * t);
+  const b = Math.round(b1 + (b2 - b1) * t);
+  return (r << 16) | (g << 8) | b;
 }
 
 
