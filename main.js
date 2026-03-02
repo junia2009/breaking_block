@@ -107,20 +107,20 @@ function setupPaddleControl() {
 // Three.jsによる3Dブロック崩しの初期化
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.min.js';
 
-// 宇宙（黒に近いグラデ）背景テクスチャ生成
+// 宇宙（黒〜紺グラデ）背景テクスチャ生成
 function createSpaceTexture() {
   const size = 1024;
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
-  // 黒に近いグラデーション
+  // 黒〜紺グラデーション
   const grad = ctx.createRadialGradient(
     size/2, size/2, size/8,
     size/2, size/2, size/2
   );
   grad.addColorStop(0, '#181a22');
-  grad.addColorStop(0.5, '#10111a');
-  grad.addColorStop(1, '#000008');
+  grad.addColorStop(0.5, '#101a2a');
+  grad.addColorStop(1, '#001033');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, size, size);
   return new THREE.CanvasTexture(canvas);
@@ -258,16 +258,16 @@ function init3D() {
   paddle.position.set(0, -1.5, 20);
   scene.add(paddle);
 
-  // ボール（アイアンマンのリパルサー風：白青発光）
+  // ボール（紺色・発光なし）
   const ballGeo = new THREE.SphereGeometry(0.6, 32, 32);
   const ballMat = new THREE.MeshPhysicalMaterial({
-    color: 0xeeeeff,
-    metalness: 0.8,
-    roughness: 0.15,
-    emissive: 0x00e5ff,
-    emissiveIntensity: 0.7,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.05
+    color: 0x003366,
+    metalness: 0.7,
+    roughness: 0.25,
+    emissive: 0x000000,
+    emissiveIntensity: 0.0,
+    clearcoat: 0.7,
+    clearcoatRoughness: 0.1
   });
   ball = new THREE.Mesh(ballGeo, ballMat);
   ball.position.set(0, 0, 18);
