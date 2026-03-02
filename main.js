@@ -64,9 +64,12 @@ function setupPaddleControl() {
   // キーボード操作（左右）
   let keyLeft = false, keyRight = false;
   window.addEventListener('keydown', (e) => {
-    if (e.code === 'ArrowLeft') keyLeft = true;
-    if (e.code === 'ArrowRight') keyRight = true;
-  });
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+      e.preventDefault();
+      if (e.code === 'ArrowLeft') keyLeft = true;
+      if (e.code === 'ArrowRight') keyRight = true;
+    }
+  }, { passive: false });
   window.addEventListener('keyup', (e) => {
     if (e.code === 'ArrowLeft') keyLeft = false;
     if (e.code === 'ArrowRight') keyRight = false;
