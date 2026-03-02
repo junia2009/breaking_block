@@ -1,19 +1,41 @@
 // スタート画面の制御
+let isGameStarted = false;
 window.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   const overlay = document.getElementById('start-overlay');
   if (startBtn && overlay) {
-    // 初期表示時はactiveクラスを付与
     overlay.classList.add('active');
     startBtn.addEventListener('click', () => {
       overlay.style.opacity = '0';
       overlay.classList.remove('active');
       setTimeout(() => { overlay.style.display = 'none'; }, 600);
-      // ゲーム本体の初期化をここで呼ぶ
-      init3D();
+      if (!isGameStarted) {
+        init3D();
+        isGameStarted = true;
+      } else {
+        resetGame();
+      }
     });
   }
 });
+// ゲームリセット処理
+function resetGame() {
+  // ブロック復活
+  if (blocks && blocks.length > 0) {
+    blocks.forEach(b => b.visible = true);
+  }
+  // ボールリセット
+  if (ball) {
+    ball.position.set(0, 0, 18);
+  }
+  if (typeof ballVelocity === 'object') {
+    ballVelocity.x = 0.18 * (Math.random() > 0.5 ? 1 : -1);
+    ballVelocity.z = -0.22;
+  }
+  isGameOver = false;
+  isGameClear = false;
+  hideMessage();
+}
 // ゲーム状態
 let isGameOver = false;
 let isGameClear = false;
