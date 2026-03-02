@@ -141,7 +141,7 @@ function init3D() {
   // シーン
   scene = new THREE.Scene();
   // サイバー＆アイアンマン風の暗い青グラデ背景
-  scene.background = new THREE.Color(0x181c1f);
+  scene.background = new THREE.Color(0x10131a);
 
   // カメラ
   camera = new THREE.PerspectiveCamera(
@@ -164,40 +164,41 @@ function init3D() {
   const floorGeo = new THREE.PlaneGeometry(30, 50, 30, 50);
   const floorMat = new THREE.MeshPhysicalMaterial({
     color: 0x181c1f,
-    metalness: 0.7,
-    roughness: 0.25,
-    clearcoat: 0.7,
-    clearcoatRoughness: 0.1,
-    emissive: 0x002244,
-    emissiveIntensity: 0.18
+    metalness: 0.9,
+    roughness: 0.12,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.05,
+    emissive: 0x003366,
+    emissiveIntensity: 0.45
   });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -2;
   scene.add(floor);
-  // グリッドヘルパー（サイバー感）
-  const grid = new THREE.GridHelper(30, 30, 0x00e5ff, 0x222233);
-  grid.position.y = -1.99;
-  grid.material.opacity = 0.35;
+  // グリッドヘルパー（サイバー感・強調）
+  const grid = new THREE.GridHelper(30, 30, 0x00e5ff, 0xff1744);
+  grid.position.y = -1.98;
+  grid.material.opacity = 0.75;
   grid.material.transparent = true;
+  grid.material.linewidth = 2;
   scene.add(grid);
-  // 光るライン（アークリアクター風）
-  const lineMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, linewidth: 2 });
+  // 光るライン（アークリアクター風・太く明るく）
+  const lineMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, linewidth: 8, transparent: true, opacity: 0.85 });
   const points = [];
   for (let i = -12; i <= 12; i += 6) {
-    points.push(new THREE.Vector3(i, -1.98, 20));
-    points.push(new THREE.Vector3(i, -1.98, -20));
+    points.push(new THREE.Vector3(i, -1.95, 20));
+    points.push(new THREE.Vector3(i, -1.95, -20));
   }
   for (let z = -20; z <= 20; z += 8) {
-    points.push(new THREE.Vector3(-12, -1.98, z));
-    points.push(new THREE.Vector3(12, -1.98, z));
+    points.push(new THREE.Vector3(-12, -1.95, z));
+    points.push(new THREE.Vector3(12, -1.95, z));
   }
   const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
   const lines = new THREE.LineSegments(lineGeo, lineMat);
   scene.add(lines);
-  // アークリアクター風ライト
-  const arcLight = new THREE.PointLight(0x00e5ff, 1.2, 30, 2);
-  arcLight.position.set(0, 0, 20);
+  // アークリアクター風ライト（強調）
+  const arcLight = new THREE.PointLight(0x00e5ff, 2.5, 60, 2);
+  arcLight.position.set(0, 2, 20);
   scene.add(arcLight);
 
   // パドル（アイアンマンの胸アーク風：青メタリック）
