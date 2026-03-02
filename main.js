@@ -129,7 +129,7 @@ function createSpaceTexture() {
 const container = document.getElementById('game-container');
 let renderer, scene, camera;
 let paddle, ball;
-let ballVelocity = { x: 0.18, y: 0, z: -0.22 };
+let ballVelocity = { x: 0.27, y: 0, z: -0.33 };
 let blocks = [];
 
 function init3D() {
@@ -383,9 +383,9 @@ function init3D() {
       }
     }
     // クリア判定
-    if (blocks.every(b => !b.visible)) {
-      isGameClear = true;
-      showMessage('クリア！');
+          if (typeof ballVelocity === 'object') {
+            ballVelocity.x = 0.27 * (Math.random() > 0.5 ? 1 : -1);
+            ballVelocity.z = -0.33;
     }
     // 下に落ちたらゲームオーバー
     if (ball.position.z > 25) {
