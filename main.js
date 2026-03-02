@@ -787,14 +787,14 @@ function onResize() {
     camera.position.set(0, 14, 30);
   } else if (h < 420) {
     // スマホ横画面（高さが狭い）
-    camera.fov = 65;
-    camera.position.set(0, 18, 34);
+    camera.fov = 62;
+    camera.position.set(0, 15, 32);
   } else {
     // 横長（PC / タブレット横）
     camera.fov = 55;
     camera.position.set(0, 12, 26);
   }
-  camera.lookAt(0, 0, 4);
+  camera.lookAt(0, 0, h < 420 ? 6 : 4);
   camera.updateProjectionMatrix();
 
   // フォグを画面サイズに応じて調整（縦長ほど薄く＝遠くまで見える）
