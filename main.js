@@ -781,8 +781,8 @@ function updateHUD() {
   // ライフ表示
   const lifeDots = document.querySelectorAll('.life');
   lifeDots.forEach((dot, i) => {
+    dot.classList.remove('lost');
     dot.classList.toggle('active', i < lives);
-    if (i >= lives) dot.classList.remove('lost');
   });
   // コンボ
   if (combo >= 2) {
