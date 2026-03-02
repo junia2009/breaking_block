@@ -5,18 +5,18 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.m
 
 // ─── 定数 ───────────────────────────────────────
 const FIELD_W  = 30;           // フィールド幅（-15〜15）
-const FIELD_D  = 50;           // フィールド奥行（-25〜25）
+const FIELD_D  = 34;           // フィールド奥行
 const PADDLE_W = 6;
 const PADDLE_H = 0.35;
 const BALL_R   = 0.45;
-const BALL_SPEED_INIT = 0.22;
-const BALL_SPEED_MAX  = 0.40;
+const BALL_SPEED_INIT = 0.18;
+const BALL_SPEED_MAX  = 0.35;
 const BLOCK_ROWS = 5;
 const BLOCK_COLS = 8;
-const BLOCK_W   = 2.8;
-const BLOCK_H   = 0.9;
-const BLOCK_D   = 0.7;
-const BLOCK_GAP = 0.35;
+const BLOCK_W   = 3.2;
+const BLOCK_H   = 1.2;
+const BLOCK_D   = 1.0;
+const BLOCK_GAP = 0.3;
 const WALL_L = -FIELD_W / 2;
 const WALL_R =  FIELD_W / 2;
 const WALL_TOP   = -FIELD_D / 2 + 2;
@@ -118,8 +118,8 @@ function initGame() {
   camera = new THREE.PerspectiveCamera(
     60, container.clientWidth / container.clientHeight, 0.1, 500
   );
-  camera.position.set(0, 18, 38);
-  camera.lookAt(0, 0, 2);
+  camera.position.set(0, 14, 28);
+  camera.lookAt(0, 0, 0);
 
   // ─ ライト ─
   scene.add(new THREE.AmbientLight(0x223344, 0.6));
@@ -369,15 +369,15 @@ function createBlocks() {
   blocks = [];
   const totalW = BLOCK_COLS * (BLOCK_W + BLOCK_GAP) - BLOCK_GAP;
   const startX = -totalW / 2 + BLOCK_W / 2;
-  const startZ = WALL_TOP + 4;
+  const startZ = WALL_TOP + 3;
 
   // 色パターン — 帝国カラー（行ごとに変化）
   const rowColors = [
-    { color: 0xcc2222, emissive: 0x880000, name: 'red'  },    // 赤
-    { color: 0x888899, emissive: 0x334455, name: 'grey' },    // 帝国グレー
-    { color: 0xcc2222, emissive: 0x880000, name: 'red'  },    // 赤
-    { color: 0x556688, emissive: 0x223344, name: 'steel' },   // スチール
-    { color: 0x333344, emissive: 0x111122, name: 'dark' },    // ダーク
+    { color: 0xff3333, emissive: 0xcc0000, name: 'red'  },    // 赤
+    { color: 0xaabbcc, emissive: 0x556688, name: 'grey' },    // 帝国グレー
+    { color: 0xff4444, emissive: 0xbb0000, name: 'red'  },    // 赤
+    { color: 0x7799bb, emissive: 0x445566, name: 'steel' },   // スチール
+    { color: 0x556677, emissive: 0x334455, name: 'dark' },    // ダーク
   ];
 
   for (let r = 0; r < BLOCK_ROWS; r++) {
@@ -389,7 +389,7 @@ function createBlocks() {
         metalness: 0.85,
         roughness: 0.15,
         emissive: rc.emissive,
-        emissiveIntensity: 0.2,
+        emissiveIntensity: 0.45,
         clearcoat: 0.5,
       });
       const mesh = new THREE.Mesh(geo, mat);
@@ -407,7 +407,7 @@ function createBlocks() {
       const edgeMat = new THREE.MeshBasicMaterial({
         color: C.blue,
         transparent: true,
-        opacity: 0.08,
+        opacity: 0.18,
         depthWrite: false,
       });
       const edge = new THREE.Mesh(edgeGeo, edgeMat);
@@ -766,16 +766,16 @@ function onResize() {
   camera.aspect = w / h;
 
   if (w / h < 0.8) {
-    camera.fov = 78;
-    camera.position.set(0, 22, 52);
+    camera.fov = 72;
+    camera.position.set(0, 18, 38);
   } else if (w / h < 1.2) {
-    camera.fov = 65;
-    camera.position.set(0, 18, 42);
+    camera.fov = 60;
+    camera.position.set(0, 14, 30);
   } else {
-    camera.fov = 58;
-    camera.position.set(0, 16, 38);
+    camera.fov = 55;
+    camera.position.set(0, 12, 26);
   }
-  camera.lookAt(0, 0, 2);
+  camera.lookAt(0, 0, 0);
   camera.updateProjectionMatrix();
 }
 
