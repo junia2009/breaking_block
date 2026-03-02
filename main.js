@@ -107,6 +107,25 @@ function setupPaddleControl() {
 // Three.jsによる3Dブロック崩しの初期化
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.min.js';
 
+// 放射状グラデーションテクスチャ生成
+function createRadialGradientTexture() {
+  const size = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createRadialGradient(
+    size/2, size/2, size/8,
+    size/2, size/2, size/2
+  );
+  grad.addColorStop(0, '#1a1a2d');
+  grad.addColorStop(0.5, '#223366');
+  grad.addColorStop(0.8, '#0a0a18');
+  grad.addColorStop(1, '#000010');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, size, size);
+  return new THREE.CanvasTexture(canvas);
+}
+
 const container = document.getElementById('game-container');
 let renderer, scene, camera;
 let paddle, ball;
@@ -140,8 +159,25 @@ function init3D() {
 
   // シーン
   scene = new THREE.Scene();
-  // サイバー＆アイアンマン風の暗い青グラデ背景
-  scene.background = new THREE.Color(0x141a23);
+  // 未知の異世界感：放射状グラデーション背景
+  scene.background = createRadialGradientTexture();
+  // 未知の異世界感：星空パーティクル
+  const starCount = 80;
+  const starGeo = new THREE.BufferGeometry();
+  const starPositions = [];
+  for (let i = 0; i < starCount; i++) {
+    // 床の外側にランダム配置
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 22 + Math.random() * 10;
+    const x = Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    const y = -1.5 + Math.random() * 2.5;
+    starPositions.push(x, y, z);
+  }
+  starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+  const starMat = new THREE.PointsMaterial({ color: 0x99ccff, size: 0.45, transparent: true, opacity: 0.7 });
+  const stars = new THREE.Points(starGeo, starMat);
+  scene.add(stars);
 
   // カメラ
   camera = new THREE.PerspectiveCamera(
