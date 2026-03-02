@@ -310,6 +310,16 @@ function init3D() {
 
   setupPaddleControl();
   animate();
+  // 画面リサイズ時にカメラ・レンダラーを自動調整
+  window.addEventListener('resize', () => {
+    if (renderer && camera && container) {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+  });
 }
 
 
