@@ -43,6 +43,7 @@ html, body {
   justify-content: center;
   background: #000;
   transition: opacity 0.8s ease;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
 }
 
 .stars-bg {

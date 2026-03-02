@@ -119,7 +119,7 @@ function initGame() {
     60, container.clientWidth / container.clientHeight, 0.1, 500
   );
   camera.position.set(0, 14, 28);
-  camera.lookAt(0, 0, 0);
+  camera.lookAt(0, 0, 4);
 
   // ─ ライト ─
   scene.add(new THREE.AmbientLight(0x223344, 0.6));
@@ -785,12 +785,16 @@ function onResize() {
     // ほぼ正方形〜やや横長
     camera.fov = 60;
     camera.position.set(0, 14, 30);
+  } else if (h < 420) {
+    // スマホ横画面（高さが狭い）
+    camera.fov = 65;
+    camera.position.set(0, 18, 34);
   } else {
-    // 横長（PC / スマホ横）
+    // 横長（PC / タブレット横）
     camera.fov = 55;
     camera.position.set(0, 12, 26);
   }
-  camera.lookAt(0, 0, 2);
+  camera.lookAt(0, 0, 4);
   camera.updateProjectionMatrix();
 
   // フォグを画面サイズに応じて調整（縦長ほど薄く＝遠くまで見える）
