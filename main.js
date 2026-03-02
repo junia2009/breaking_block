@@ -72,14 +72,14 @@ function setupPaddleControl() {
     const rect = renderer.domElement.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     // -14〜14の範囲でパドルを動かす
-    paddle.position.x = Math.max(-14, Math.min(14, x * 14));
+    paddle.position.x = Math.max(-14, Math.min(14, x * 18));
   });
   // タッチ操作
   window.addEventListener('touchmove', (e) => {
     if (e.touches.length > 0) {
       const rect = renderer.domElement.getBoundingClientRect();
       const x = ((e.touches[0].clientX - rect.left) / rect.width) * 2 - 1;
-      paddle.position.x = Math.max(-14, Math.min(14, x * 14));
+      paddle.position.x = Math.max(-14, Math.min(14, x * 18));
     }
   }, { passive: false });
 
