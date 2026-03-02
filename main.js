@@ -382,10 +382,11 @@ function init3D() {
         break;
       }
     }
-    // クリア判定
-          if (typeof ballVelocity === 'object') {
-            ballVelocity.x = 0.27 * (Math.random() > 0.5 ? 1 : -1);
-            ballVelocity.z = -0.33;
+    // クリア判定（全ブロック消えたら）
+    const allCleared = blocks.every(b => !b.visible);
+    if (allCleared) {
+      isGameClear = true;
+      showMessage('ゲームクリア！');
     }
     // 下に落ちたらゲームオーバー
     if (ball.position.z > 25) {
