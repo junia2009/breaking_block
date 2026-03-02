@@ -4,13 +4,13 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.min.js';
 
 // ─── 定数 ───────────────────────────────────────
-const FIELD_W  = 30;           // フィールド幅（-15〜15）
+const FIELD_W  = 24;           // フィールド幅（-12〜12）
 const FIELD_D  = 34;           // フィールド奥行
-const PADDLE_W = 7;
+const PADDLE_W = 6;
 const PADDLE_H = 0.35;
 const BALL_R   = 0.45;
-const BALL_SPEED_INIT = 0.20;
-const BALL_SPEED_MAX  = 0.38;
+const BALL_SPEED_INIT = 0.26;
+const BALL_SPEED_MAX  = 0.45;
 const BLOCK_ROWS = 5;
 const BLOCK_COLS = 7;
 const BLOCK_W   = 3.0;
@@ -22,7 +22,7 @@ const WALL_R =  FIELD_W / 2;
 const WALL_TOP   = -FIELD_D / 2 + 2;
 const PADDLE_Z   =  FIELD_D / 2 - 5;
 const DEAD_Z     =  FIELD_D / 2 + 2;
-const MAX_LIVES  = 5;
+const MAX_LIVES  = 3;
 
 // ─── カラーパレット ──────────────────────────────
 const C = {
