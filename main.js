@@ -92,16 +92,32 @@ function init3D() {
   floor.position.y = -2;
   scene.add(floor);
 
-  // パドル
+  // パドル（アイアンマンの胸アーク風：青メタリック）
   const paddleGeo = new THREE.BoxGeometry(6, 0.7, 1.2);
-  const paddleMat = new THREE.MeshPhongMaterial({ color: 0x2196f3 });
+  const paddleMat = new THREE.MeshPhysicalMaterial({
+    color: 0x00e5ff,
+    metalness: 0.7,
+    roughness: 0.2,
+    clearcoat: 0.7,
+    clearcoatRoughness: 0.1,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.25
+  });
   paddle = new THREE.Mesh(paddleGeo, paddleMat);
   paddle.position.set(0, -1.5, 20);
   scene.add(paddle);
 
-  // ボール
+  // ボール（アイアンマンのリパルサー風：白青発光）
   const ballGeo = new THREE.SphereGeometry(0.6, 32, 32);
-  const ballMat = new THREE.MeshPhongMaterial({ color: 0xffeb3b });
+  const ballMat = new THREE.MeshPhysicalMaterial({
+    color: 0xeeeeff,
+    metalness: 0.8,
+    roughness: 0.15,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.7,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.05
+  });
   ball = new THREE.Mesh(ballGeo, ballMat);
   ball.position.set(0, 0, 18);
   scene.add(ball);
@@ -115,7 +131,17 @@ function init3D() {
   for (let r = 0; r < blockRows; r++) {
     for (let c = 0; c < blockCols; c++) {
       const blockGeo = new THREE.BoxGeometry(blockW, blockH, blockD);
-      const blockMat = new THREE.MeshPhongMaterial({ color: 0xe57373 });
+      // アイアンマンの装甲イメージ：赤・金メタリック
+      const isGold = (c + r) % 2 === 0;
+      const blockMat = new THREE.MeshPhysicalMaterial({
+        color: isGold ? 0xffd700 : 0xb71c1c,
+        metalness: 0.85,
+        roughness: 0.18,
+        clearcoat: 0.7,
+        clearcoatRoughness: 0.08,
+        emissive: isGold ? 0xffe082 : 0x880000,
+        emissiveIntensity: isGold ? 0.18 : 0.12
+      });
       const block = new THREE.Mesh(blockGeo, blockMat);
       block.position.x = (c - (blockCols - 1) / 2) * (blockW + 0.4);
       block.position.y = 0.5;
