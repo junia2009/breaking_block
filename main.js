@@ -245,14 +245,18 @@ function init3D() {
 
   // パドル（横長の細いカプセル型サイバーバー）
   const paddleGeo = new THREE.CapsuleGeometry(0.28, 5.4, 8, 32); // 横長・細い
+  // 赤と金のグラデーション風マテリアル
   const paddleMat = new THREE.MeshPhysicalMaterial({
-    color: 0x0099ff,
+    color: 0xb71c1c,
     metalness: 0.85,
     roughness: 0.18,
     clearcoat: 0.9,
     clearcoatRoughness: 0.05,
-    emissive: 0x003366,
-    emissiveIntensity: 0.18
+    emissive: 0xffd700,
+    emissiveIntensity: 0.18,
+    sheen: 1.0,
+    sheenColor: new THREE.Color(0xffd700),
+    sheenRoughness: 0.2
   });
   paddle = new THREE.Mesh(paddleGeo, paddleMat);
   paddle.position.set(0, -1.15, 20);
