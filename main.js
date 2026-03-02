@@ -151,8 +151,11 @@ function initGame() {
   // ─ 操作 ─
   setupControls();
 
-  // ─ リサイズ ─
+  // ─ リサイズ & 画面回転対応 ─
   window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(onResize, 150);  // 回転アニメ完了後に再計算
+  });
   onResize();
 
   // ─ ボール初期速度 ─
@@ -763,20 +766,37 @@ function onResize() {
   const w = container.clientWidth;
   const h = container.clientHeight;
   renderer.setSize(w, h);
-  camera.aspect = w / h;
+  const aspect = w / h;
+  camera.aspect = aspect;
 
-  if (w / h < 0.8) {
-    camera.fov = 72;
-    camera.position.set(0, 18, 38);
-  } else if (w / h < 1.2) {
+  if (aspect < 0.55) {
+    // 超縦長（スマホ縦画面）
+    camera.fov = 90;
+    camera.position.set(0, 24, 48);
+  } else if (aspect < 0.75) {
+    // 縦長（スマホ縦 or タブレット縦）
+    camera.fov = 82;
+    camera.position.set(0, 22, 44);
+  } else if (aspect < 1.0) {
+    // やや縦長
+    camera.fov = 70;
+    camera.position.set(0, 18, 36);
+  } else if (aspect < 1.4) {
+    // ほぼ正方形〜やや横長
     camera.fov = 60;
     camera.position.set(0, 14, 30);
   } else {
+    // 横長（PC / スマホ横）
     camera.fov = 55;
     camera.position.set(0, 12, 26);
   }
-  camera.lookAt(0, 0, 0);
+  camera.lookAt(0, 0, 2);
   camera.updateProjectionMatrix();
+
+  // フォグを画面サイズに応じて調整（縦長ほど薄く＝遠くまで見える）
+  if (scene.fog) {
+    scene.fog.density = aspect < 0.75 ? 0.005 : 0.008;
+  }
 }
 
 // ================================================================
