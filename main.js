@@ -1,3 +1,14 @@
+// スタート画面の制御
+window.addEventListener('DOMContentLoaded', () => {
+  const startBtn = document.getElementById('start-btn');
+  const overlay = document.getElementById('start-overlay');
+  if (startBtn && overlay) {
+    startBtn.addEventListener('click', () => {
+      overlay.style.opacity = '0';
+      setTimeout(() => { overlay.style.display = 'none'; }, 600);
+    });
+  }
+});
 // ゲーム状態
 let isGameOver = false;
 let isGameClear = false;
