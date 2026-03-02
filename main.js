@@ -317,9 +317,21 @@ function init3D() {
       const h = container.clientHeight;
       renderer.setSize(w, h);
       camera.aspect = w / h;
+      // アスペクト比に応じてFOVとカメラ位置を調整
+      if (w / h < 1) {
+        // 縦長画面：FOV広げてカメラ遠ざける
+        camera.fov = 80;
+        camera.position.set(0, 16, 60);
+      } else {
+        // 横長・標準
+        camera.fov = 60;
+        camera.position.set(0, 10, 40);
+      }
       camera.updateProjectionMatrix();
     }
   });
+  // 初回も一度リサイズ処理を呼ぶ
+  window.dispatchEvent(new Event('resize'));
 }
 
 
