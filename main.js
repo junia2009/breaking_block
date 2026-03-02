@@ -12,11 +12,11 @@ const BALL_R   = 0.45;
 const BALL_SPEED_INIT = 0.26;
 const BALL_SPEED_MAX  = 0.45;
 const BLOCK_ROWS = 5;
-const BLOCK_COLS = 8;
-const BLOCK_W   = 3.2;
+const BLOCK_COLS = 7;
+const BLOCK_W   = 3.0;
 const BLOCK_H   = 1.2;
 const BLOCK_D   = 1.0;
-const BLOCK_GAP = 0.3;
+const BLOCK_GAP = 0.4;
 const WALL_L = -FIELD_W / 2;
 const WALL_R =  FIELD_W / 2;
 const WALL_TOP   = -FIELD_D / 2 + 2;
@@ -369,7 +369,7 @@ function createBlocks() {
   blocks = [];
   const totalW = BLOCK_COLS * (BLOCK_W + BLOCK_GAP) - BLOCK_GAP;
   const startX = -totalW / 2 + BLOCK_W / 2;
-  const startZ = WALL_TOP + 3;
+  const startZ = WALL_TOP + 5;
 
   // 色パターン — 帝国カラー（行ごとに変化）
   const rowColors = [
