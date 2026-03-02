@@ -363,9 +363,9 @@ function init3D() {
       ballVelocity.z *= -1;
       // パドルの端で跳ね返るときに角度をつける
       const hitPos = (ball.position.x - paddle.position.x) / 3.2;
-      ballVelocity.x += hitPos * 0.08;
+      ballVelocity.x += hitPos * 0.04;
       // 速度の上限
-      ballVelocity.x = Math.max(Math.min(ballVelocity.x, 0.35), -0.35);
+      ballVelocity.x = Math.max(Math.min(ballVelocity.x, 0.5), -0.5);
     }
     // ブロック当たり判定・消去
     let blockHit = false;
