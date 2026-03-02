@@ -3,19 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ブロック崩し</title>
+  <title>STAR BREAKER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="game-container">
-    <canvas id="game-canvas"></canvas>
+    <!-- スタート画面 -->
     <div id="start-overlay">
-      <div class="start-title">BLOCK BREAKER</div>
-        <div class="start-version">ver2.0.0</div>
-      <button id="start-btn">START</button>
+      <div class="stars-bg"></div>
+      <div class="start-content">
+        <div class="start-subtitle">A LONG TIME AGO IN A GALAXY FAR, FAR AWAY...</div>
+        <div class="start-title">STAR<br>BREAKER</div>
+        <div class="start-version">EPISODE III — ver 3.0.0</div>
+        <div class="start-description">銀河に散らばるブロックを<br>すべて破壊せよ</div>
+        <button id="start-btn">
+          <span class="btn-icon">▶</span>
+          <span class="btn-text">LAUNCH</span>
+        </button>
+        <div class="start-controls">
+          <div class="control-item">◀ ▶ パドル移動</div>
+          <div class="control-item">マウス / タッチ対応</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+      <div id="hud-left">
+        <div class="hud-label">SCORE</div>
+        <div id="hud-score">0</div>
+      </div>
+      <div id="hud-center">
+        <div id="hud-combo" class="hidden">COMBO x<span id="combo-count">2</span></div>
+      </div>
+      <div id="hud-right">
+        <div class="hud-label">LIVES</div>
+        <div id="hud-lives">
+          <span class="life active"></span>
+          <span class="life active"></span>
+          <span class="life active"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ゲームメッセージ -->
+    <div id="game-message" class="hidden">
+      <div id="msg-title"></div>
+      <div id="msg-sub"></div>
+      <button id="msg-btn" class="hidden">RETRY</button>
     </div>
   </div>
-  <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.min.js"></script>
+
   <script src="main.js" type="module"></script>
 </body>
 </html>

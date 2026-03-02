@@ -1,417 +1,787 @@
-// スタート画面の制御
-let isGameStarted = false;
-window.addEventListener('DOMContentLoaded', () => {
-  const startBtn = document.getElementById('start-btn');
-  const overlay = document.getElementById('start-overlay');
-  if (startBtn && overlay) {
-    overlay.classList.add('active');
-    startBtn.addEventListener('click', () => {
-      overlay.style.opacity = '0';
-      overlay.classList.remove('active');
-      setTimeout(() => { overlay.style.display = 'none'; }, 600);
-      if (!isGameStarted) {
-        init3D();
-        isGameStarted = true;
-      } else {
-        resetGame();
-      }
-    });
-  }
-});
-// ゲームリセット処理
-function resetGame() {
-  // ブロック復活
-  if (blocks && blocks.length > 0) {
-    blocks.forEach(b => b.visible = true);
-  }
-  // ボールリセット
-  if (ball) {
-    ball.position.set(0, 0, 18);
-  }
-  if (typeof ballVelocity === 'object') {
-    ballVelocity.x = 0.18 * (Math.random() > 0.5 ? 1 : -1);
-    ballVelocity.z = -0.22;
-  }
-  isGameOver = false;
-  isGameClear = false;
-  hideMessage();
-}
-// ゲーム状態
-let isGameOver = false;
-let isGameClear = false;
-
-// メッセージ表示
-function showMessage(text) {
-  let msg = document.getElementById('game-message');
-  if (!msg) {
-    msg = document.createElement('div');
-    msg.id = 'game-message';
-    msg.style.position = 'absolute';
-    msg.style.top = '50%';
-    msg.style.left = '50%';
-    msg.style.transform = 'translate(-50%, -50%)';
-    msg.style.fontSize = '2.2rem';
-    msg.style.color = '#fff';
-    msg.style.textShadow = '0 2px 8px #000a';
-    msg.style.zIndex = '20';
-    msg.style.pointerEvents = 'none';
-    document.getElementById('game-container').appendChild(msg);
-  }
-  msg.textContent = text;
-  msg.style.display = 'block';
-}
-
-function hideMessage() {
-  const msg = document.getElementById('game-message');
-  if (msg) msg.style.display = 'none';
-}
-// パドル操作（マウス・タッチ）
-function setupPaddleControl() {
-  // マウス操作
-  window.addEventListener('mousemove', (e) => {
-    const rect = renderer.domElement.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    // -14〜14の範囲でパドルを動かす
-    paddle.position.x = Math.max(-14, Math.min(14, x * 18));
-  });
-  // タッチ操作
-  window.addEventListener('touchmove', (e) => {
-    if (e.touches.length > 0) {
-      const rect = renderer.domElement.getBoundingClientRect();
-      const x = ((e.touches[0].clientX - rect.left) / rect.width) * 2 - 1;
-      paddle.position.x = Math.max(-14, Math.min(14, x * 18));
-    }
-  }, { passive: false });
-
-  // キーボード操作（左右）
-  let keyLeft = false, keyRight = false;
-  window.addEventListener('keydown', (e) => {
-    if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-      e.preventDefault();
-      if (e.code === 'ArrowLeft') keyLeft = true;
-      if (e.code === 'ArrowRight') keyRight = true;
-    }
-  }, { passive: false });
-  window.addEventListener('keyup', (e) => {
-    if (e.code === 'ArrowLeft') keyLeft = false;
-    if (e.code === 'ArrowRight') keyRight = false;
-  });
-
-  function movePaddleByKey() {
-    if (keyLeft) paddle.position.x = Math.max(-14, paddle.position.x - 0.5);
-    if (keyRight) paddle.position.x = Math.min(14, paddle.position.x + 0.5);
-    requestAnimationFrame(movePaddleByKey);
-  }
-  movePaddleByKey();
-}
-// Three.jsによる3Dブロック崩しの初期化
+// ============================================================
+//  STAR BREAKER — Star Wars Themed Block Breaker (Three.js)
+// ============================================================
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.min.js';
 
-// 宇宙（黒〜紺グラデ）背景テクスチャ生成
-function createSpaceTexture() {
-  const size = 1024;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  // 黒〜紺グラデーション
-  const grad = ctx.createRadialGradient(
-    size/2, size/2, size/8,
-    size/2, size/2, size/2
+// ─── 定数 ───────────────────────────────────────
+const FIELD_W  = 30;           // フィールド幅（-15〜15）
+const FIELD_D  = 50;           // フィールド奥行（-25〜25）
+const PADDLE_W = 6;
+const PADDLE_H = 0.35;
+const BALL_R   = 0.45;
+const BALL_SPEED_INIT = 0.22;
+const BALL_SPEED_MAX  = 0.40;
+const BLOCK_ROWS = 5;
+const BLOCK_COLS = 8;
+const BLOCK_W   = 2.8;
+const BLOCK_H   = 0.9;
+const BLOCK_D   = 0.7;
+const BLOCK_GAP = 0.35;
+const WALL_L = -FIELD_W / 2;
+const WALL_R =  FIELD_W / 2;
+const WALL_TOP   = -FIELD_D / 2 + 2;
+const PADDLE_Z   =  FIELD_D / 2 - 5;
+const DEAD_Z     =  FIELD_D / 2 + 2;
+const MAX_LIVES  = 3;
+
+// ─── カラーパレット ──────────────────────────────
+const C = {
+  yellow:    0xFFE81F,
+  blue:      0x4FC3F7,
+  blueDark:  0x0A2540,
+  red:       0xFF3333,
+  green:     0x66FF66,
+  white:     0xFFFFFF,
+  imperial:  0x556677,
+  panelDark: 0x1a2a3a,
+};
+
+// ─── ゲーム状態 ──────────────────────────────────
+let started   = false;
+let paused    = false;
+let gameOver  = false;
+let gameClear = false;
+let score     = 0;
+let combo     = 0;
+let lives     = MAX_LIVES;
+
+// ─── Three.js 変数 ───────────────────────────────
+let renderer, scene, camera, clock;
+let paddle, ball, ballGlow;
+let ballVel    = new THREE.Vector3();
+let blocks     = [];
+let particles  = [];
+let trailParts = [];
+let starField;
+
+// ─── DOM ─────────────────────────────────────────
+const container  = document.getElementById('game-container');
+const overlay    = document.getElementById('start-overlay');
+const startBtn   = document.getElementById('start-btn');
+const hud        = document.getElementById('hud');
+const hudScore   = document.getElementById('hud-score');
+const hudCombo   = document.getElementById('hud-combo');
+const comboCount = document.getElementById('combo-count');
+const msgBox     = document.getElementById('game-message');
+const msgTitle   = document.getElementById('msg-title');
+const msgSub     = document.getElementById('msg-sub');
+const msgBtn     = document.getElementById('msg-btn');
+
+// ================================================================
+//  スタート画面
+// ================================================================
+startBtn.addEventListener('click', () => {
+  overlay.style.opacity = '0';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    if (!started) {
+      initGame();
+      started = true;
+    } else {
+      resetGame();
+    }
+    hud.classList.add('visible');
+  }, 800);
+});
+
+msgBtn.addEventListener('click', () => {
+  hideMessage();
+  resetGame();
+});
+
+// ================================================================
+//  初期化
+// ================================================================
+function initGame() {
+  clock = new THREE.Clock();
+
+  // ─ レンダラー ─
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setClearColor(0x000000);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  const cvs = renderer.domElement;
+  cvs.style.position = 'absolute';
+  cvs.style.inset = '0';
+  cvs.style.width = '100%';
+  cvs.style.height = '100%';
+  cvs.style.zIndex = '2';
+  container.appendChild(cvs);
+
+  // ─ シーン ─
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x000011, 0.008);
+
+  // ─ カメラ ─
+  camera = new THREE.PerspectiveCamera(
+    60, container.clientWidth / container.clientHeight, 0.1, 500
   );
-  grad.addColorStop(0, '#181a22');
-  grad.addColorStop(0.5, '#101a2a');
-  grad.addColorStop(1, '#001033');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, size, size);
-  return new THREE.CanvasTexture(canvas);
+  camera.position.set(0, 18, 38);
+  camera.lookAt(0, 0, 2);
+
+  // ─ ライト ─
+  scene.add(new THREE.AmbientLight(0x223344, 0.6));
+  const dir = new THREE.DirectionalLight(0xaaccff, 0.8);
+  dir.position.set(5, 20, 15);
+  scene.add(dir);
+
+  // 淡いブルーのポイントライト
+  const pl1 = new THREE.PointLight(C.blue, 0.6, 60);
+  pl1.position.set(0, 8, 0);
+  scene.add(pl1);
+
+  // ─ 宇宙背景 ─
+  createStarField();
+  createNebula();
+
+  // ─ フィールド ─
+  createField();
+
+  // ─ パドル ─
+  createPaddle();
+
+  // ─ ボール ─
+  createBall();
+
+  // ─ ブロック ─
+  createBlocks();
+
+  // ─ 操作 ─
+  setupControls();
+
+  // ─ リサイズ ─
+  window.addEventListener('resize', onResize);
+  onResize();
+
+  // ─ ボール初期速度 ─
+  launchBall();
+
+  // ─ ループ開始 ─
+  animate();
 }
 
-const container = document.getElementById('game-container');
-let renderer, scene, camera;
-let paddle, ball;
-let ballVelocity = { x: 0.18, y: 0, z: -0.22 };
-let blocks = [];
-
-function init3D() {
-  // レンダラー
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setClearColor(0x222222, 1);
-    // 既存canvasの上にThree.jsのcanvasを重ねる
-    const oldCanvas = document.getElementById('game-canvas');
-    if (oldCanvas) {
-      oldCanvas.style.background = '#23272b';
-      oldCanvas.style.display = 'block';
-      oldCanvas.style.position = 'absolute';
-      oldCanvas.style.top = '0';
-      oldCanvas.style.left = '0';
-      oldCanvas.style.width = '100%';
-      oldCanvas.style.height = '100%';
-      oldCanvas.style.zIndex = '1';
-    }
-    renderer.domElement.style.position = 'absolute';
-    renderer.domElement.style.top = '0';
-    renderer.domElement.style.left = '0';
-    renderer.domElement.style.width = '100%';
-    renderer.domElement.style.height = '100%';
-    renderer.domElement.style.zIndex = '2';
-  container.appendChild(renderer.domElement);
-
-  // シーン
-  scene = new THREE.Scene();
-  // 一面に広がる宇宙背景
-  scene.background = createSpaceTexture();
-  // 宇宙全体に星パーティクル
-  const starCount = 120;
-  const starGeo = new THREE.BufferGeometry();
-  const starPositions = [];
-  const starColors = [];
-  for (let i = 0; i < starCount; i++) {
-    // 全体にランダム配置
-    const phi = Math.random() * Math.PI;
-    const theta = Math.random() * Math.PI * 2;
-    const r = 28 + Math.random() * 18;
-    const x = Math.sin(phi) * Math.cos(theta) * r;
-    const y = (Math.random() - 0.5) * 18;
-    const z = Math.sin(phi) * Math.sin(theta) * r;
-    starPositions.push(x, y, z);
-    // 輝度ランダムな白〜青白
-    const c = 0.7 + Math.random() * 0.3;
-    starColors.push(c, c, 1.0);
+// ================================================================
+//  宇宙背景
+// ================================================================
+function createStarField() {
+  const count = 600;
+  const geo = new THREE.BufferGeometry();
+  const pos  = new Float32Array(count * 3);
+  const cols = new Float32Array(count * 3);
+  const sizes = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    pos[i * 3]     = (Math.random() - 0.5) * 200;
+    pos[i * 3 + 1] = (Math.random() - 0.5) * 120;
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 200 - 40;
+    const brightness = 0.5 + Math.random() * 0.5;
+    const blueShift  = Math.random() * 0.3;
+    cols[i * 3]     = brightness;
+    cols[i * 3 + 1] = brightness;
+    cols[i * 3 + 2] = brightness + blueShift;
+    sizes[i] = 0.3 + Math.random() * 0.7;
   }
-  starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
-  starGeo.setAttribute('color', new THREE.Float32BufferAttribute(starColors, 3));
-  const starMat = new THREE.PointsMaterial({
-    size: 0.18,
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('color',    new THREE.Float32BufferAttribute(cols, 3));
+  geo.setAttribute('size',     new THREE.Float32BufferAttribute(sizes, 1));
+
+  const mat = new THREE.PointsMaterial({
+    size: 0.35,
     vertexColors: true,
     transparent: true,
-    opacity: 0.85,
-    sizeAttenuation: true
+    opacity: 0.9,
+    sizeAttenuation: true,
+    depthWrite: false,
   });
-  const stars = new THREE.Points(starGeo, starMat);
-  scene.add(stars);
+  starField = new THREE.Points(geo, mat);
+  scene.add(starField);
+}
 
-  // カメラ
-  camera = new THREE.PerspectiveCamera(
-    60,
-    container.clientWidth / container.clientHeight,
-    0.1,
-    1000
-  );
-  camera.position.set(0, 10, 40);
-  camera.lookAt(0, 0, 0);
+function createNebula() {
+  // 薄い青紫のフォグ的な大きな半透明球
+  const geo = new THREE.SphereGeometry(80, 32, 32);
+  const mat = new THREE.MeshBasicMaterial({
+    color: 0x0a1530,
+    transparent: true,
+    opacity: 0.35,
+    side: THREE.BackSide,
+    depthWrite: false,
+  });
+  const nebula = new THREE.Mesh(geo, mat);
+  scene.add(nebula);
+}
 
-  // ライト
-  const ambient = new THREE.AmbientLight(0xffffff, 0.7);
-  scene.add(ambient);
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
-  dirLight.position.set(0, 20, 20);
-  scene.add(dirLight);
-
-  // 床（上品な青グラデ＋控えめグリッド＋中央光ライン）
-  const floorGeo = new THREE.PlaneGeometry(30, 50, 1, 1);
+// ================================================================
+//  フィールド（プレイエリア）
+// ================================================================
+function createField() {
+  // 床面
+  const floorGeo = new THREE.PlaneGeometry(FIELD_W, FIELD_D);
   const floorMat = new THREE.MeshPhysicalMaterial({
-    color: 0x0d2236,
-    metalness: 0.7,
-    roughness: 0.18,
-    clearcoat: 0.8,
-    clearcoatRoughness: 0.08,
-    emissive: 0x003366,
-    emissiveIntensity: 0.18
+    color: 0x060e18,
+    metalness: 0.8,
+    roughness: 0.15,
+    clearcoat: 0.5,
+    emissive: 0x0a1a2f,
+    emissiveIntensity: 0.15,
   });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -2;
   scene.add(floor);
-  // 控えめなグリッド
-  const grid = new THREE.GridHelper(30, 10, 0x225577, 0x223344);
-  grid.position.y = -1.98;
-  grid.material.opacity = 0.22;
+
+  // グリッドライン（ホログラム風）
+  const grid = new THREE.GridHelper(FIELD_W, 20, 0x112233, 0x0a1520);
+  grid.position.y = -1.95;
+  grid.material.opacity = 0.2;
   grid.material.transparent = true;
   scene.add(grid);
-  // 中央に光るライン
-  const lineMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, linewidth: 6, transparent: true, opacity: 0.55 });
-  const linePoints = [
-    new THREE.Vector3(0, -1.95, 24),
-    new THREE.Vector3(0, -1.95, -24)
-  ];
-  const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
-  const line = new THREE.Line(lineGeo, lineMat);
-  scene.add(line);
-  // アークリアクター風ライト（淡く）
-  const arcLight = new THREE.PointLight(0x00e5ff, 1.1, 30, 2);
-  arcLight.position.set(0, 2, 20);
-  scene.add(arcLight);
 
-  // パドル（横長の細いカプセル型サイバーバー）
-  const paddleGeo = new THREE.CapsuleGeometry(0.28, 5.4, 8, 32); // 横長・細い
-  // 赤と金のグラデーション風マテリアル
-  const paddleMat = new THREE.MeshPhysicalMaterial({
-    color: 0xb71c1c,
-    metalness: 0.85,
-    roughness: 0.18,
-    clearcoat: 0.9,
-    clearcoatRoughness: 0.05,
-    emissive: 0xffd700,
-    emissiveIntensity: 0.18,
-    sheen: 1.0,
-    sheenColor: new THREE.Color(0xffd700),
-    sheenRoughness: 0.2
+  // 境界線（青く光るライン）
+  const borderMat = new THREE.LineBasicMaterial({
+    color: C.blue,
+    transparent: true,
+    opacity: 0.35,
   });
-  paddle = new THREE.Mesh(paddleGeo, paddleMat);
-  paddle.position.set(0, -1.15, 20);
-  paddle.rotation.z = Math.PI / 2; // 横向きに
-  scene.add(paddle);
-  // ...paddleLine削除...
-
-  // ボール（紺色・発光なし）
-  const ballGeo = new THREE.SphereGeometry(0.6, 32, 32);
-  const ballMat = new THREE.MeshPhysicalMaterial({
-    color: 0x003366,
-    metalness: 0.7,
-    roughness: 0.25,
-    emissive: 0x000000,
-    emissiveIntensity: 0.0,
-    clearcoat: 0.7,
-    clearcoatRoughness: 0.1
-  });
-  ball = new THREE.Mesh(ballGeo, ballMat);
-  ball.position.set(0, 0, 18);
-  scene.add(ball);
-
-  // ブロック
-  const blockRows = 5;
-  const blockCols = 7;
-  const blockW = 3.2;
-  const blockH = 1.2;
-  const blockD = 1;
-  for (let r = 0; r < blockRows; r++) {
-    for (let c = 0; c < blockCols; c++) {
-      const blockGeo = new THREE.BoxGeometry(blockW, blockH, blockD);
-      // アイアンマンの装甲イメージ：赤・金メタリック
-      const isGold = (c + r) % 2 === 0;
-      const blockMat = new THREE.MeshPhysicalMaterial({
-        color: isGold ? 0xffd700 : 0xb71c1c,
-        metalness: 0.85,
-        roughness: 0.18,
-        clearcoat: 0.7,
-        clearcoatRoughness: 0.08,
-        emissive: isGold ? 0xffe082 : 0x880000,
-        emissiveIntensity: isGold ? 0.18 : 0.12
-      });
-      const block = new THREE.Mesh(blockGeo, blockMat);
-      block.position.x = (c - (blockCols - 1) / 2) * (blockW + 0.4);
-      block.position.y = 0.5;
-      block.position.z = 6 - r * (blockD + 0.5);
-      scene.add(block);
-      blocks.push(block);
-    }
-  }
-
-  setupPaddleControl();
-  animate();
-  // 画面リサイズ時にカメラ・レンダラーを自動調整
-  window.addEventListener('resize', () => {
-    if (renderer && camera && container) {
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      renderer.setSize(w, h);
-      camera.aspect = w / h;
-      // アスペクト比に応じてFOVとカメラ位置を調整
-      if (w / h < 1) {
-        // 縦長画面：FOV広げてカメラ遠ざける
-        camera.fov = 80;
-        camera.position.set(0, 16, 60);
-      } else {
-        // 横長・標準
-        camera.fov = 60;
-        camera.position.set(0, 10, 40);
-      }
-      camera.updateProjectionMatrix();
-    }
-  });
-  // 初回も一度リサイズ処理を呼ぶ
-  window.dispatchEvent(new Event('resize'));
+  // 左壁
+  addBorderLine(
+    [WALL_L, -1.9, WALL_TOP], [WALL_L, -1.9, DEAD_Z], borderMat
+  );
+  // 右壁
+  addBorderLine(
+    [WALL_R, -1.9, WALL_TOP], [WALL_R, -1.9, DEAD_Z], borderMat
+  );
+  // 奥壁
+  addBorderLine(
+    [WALL_L, -1.9, WALL_TOP], [WALL_R, -1.9, WALL_TOP], borderMat
+  );
 }
 
+function addBorderLine(a, b, mat) {
+  const geo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(...a), new THREE.Vector3(...b),
+  ]);
+  scene.add(new THREE.Line(geo, mat));
+}
 
-  // ボール移動・壁反射・パドル反射
-  function updateBall() {
-    if (isGameOver || isGameClear) return;
-    // 移動
-    ball.position.x += ballVelocity.x;
-    ball.position.z += ballVelocity.z;
+// ================================================================
+//  パドル（ライトセーバー風）
+// ================================================================
+function createPaddle() {
+  const group = new THREE.Group();
 
-    // 壁反射（左右）
-    if (ball.position.x > 14 || ball.position.x < -14) {
-      ballVelocity.x *= -1;
-      ball.position.x = Math.max(Math.min(ball.position.x, 14), -14);
-    }
-    // 壁反射（上）
-    if (ball.position.z < -23) {
-      ballVelocity.z *= -1;
-      ball.position.z = -23;
-    }
-    // パドル反射
-    if (
-      ball.position.z > paddle.position.z - 0.8 &&
-      ball.position.z < paddle.position.z + 0.8 &&
-      ball.position.x > paddle.position.x - 3.2 &&
-      ball.position.x < paddle.position.x + 3.2 &&
-      ballVelocity.z > 0
-    ) {
-      ballVelocity.z *= -1;
-      // パドルの端で跳ね返るときに角度をつける
-      const hitPos = (ball.position.x - paddle.position.x) / 3.2;
-      ballVelocity.x += hitPos * 0.08;
-      // 速度の上限
-      ballVelocity.x = Math.max(Math.min(ballVelocity.x, 0.35), -0.35);
-    }
-    // ブロック当たり判定・消去
-    let blockHit = false;
-    for (let i = blocks.length - 1; i >= 0; i--) {
-      const block = blocks[i];
-      if (!block.visible) continue;
-      const dx = Math.abs(ball.position.x - block.position.x);
-      const dz = Math.abs(ball.position.z - block.position.z);
-      if (dx < 1.8 && dz < 1.1) {
-        // ヒット時
-        block.visible = false;
-        ballVelocity.z *= -1;
-        blockHit = true;
-        break;
-      }
-    }
-    // クリア判定
-    if (blocks.every(b => !b.visible)) {
-      isGameClear = true;
-      showMessage('クリア！');
-    }
-    // 下に落ちたらゲームオーバー
-    if (ball.position.z > 25) {
-      isGameOver = true;
-      showMessage('ゲームオーバー');
-    }
-  }
+  // 本体 — 横長のバー
+  const geo = new THREE.BoxGeometry(PADDLE_W, PADDLE_H, 0.4);
+  const mat = new THREE.MeshPhysicalMaterial({
+    color: C.blue,
+    metalness: 0.6,
+    roughness: 0.2,
+    emissive: C.blue,
+    emissiveIntensity: 0.5,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.05,
+    transparent: true,
+    opacity: 0.92,
+  });
+  const bar = new THREE.Mesh(geo, mat);
+  group.add(bar);
 
-  function animate() {
-    requestAnimationFrame(animate);
-    updateBall();
-    renderer.render(scene, camera);
-  }
+  // グロー（横長のスプライト的な板）
+  const glowGeo = new THREE.PlaneGeometry(PADDLE_W + 1.5, 1.8);
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: C.blue,
+    transparent: true,
+    opacity: 0.12,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
+  const glow = new THREE.Mesh(glowGeo, glowMat);
+  glow.rotation.x = -Math.PI / 2;
+  glow.position.y = -0.1;
+  group.add(glow);
 
-  // ゲームオーバー・クリア時にスタート画面へ戻す
-  window.addEventListener('pointerdown', () => {
-    if (isGameOver || isGameClear) {
-      // スタート画面再表示
-      const overlay = document.getElementById('start-overlay');
-      if (overlay) {
-        overlay.style.display = 'flex';
-        overlay.style.opacity = '1';
-        overlay.classList.add('active');
-      }
-      hideMessage();
-    }
+  // 端に光る丸
+  [-PADDLE_W / 2, PADDLE_W / 2].forEach(x => {
+    const capGeo = new THREE.SphereGeometry(0.22, 16, 16);
+    const capMat = new THREE.MeshBasicMaterial({
+      color: 0xFFFFFF,
+      transparent: true,
+      opacity: 0.8,
+    });
+    const cap = new THREE.Mesh(capGeo, capMat);
+    cap.position.set(x, 0, 0);
+    group.add(cap);
   });
 
-// window.addEventListener('DOMContentLoaded', init3D); // スタート画面からのみ呼び出す
+  // ポイントライト
+  const light = new THREE.PointLight(C.blue, 1.2, 12);
+  light.position.y = 1;
+  group.add(light);
+
+  group.position.set(0, -1.2, PADDLE_Z);
+  scene.add(group);
+  paddle = group;
+}
+
+// ================================================================
+//  ボール
+// ================================================================
+function createBall() {
+  const group = new THREE.Group();
+
+  const geo = new THREE.SphereGeometry(BALL_R, 24, 24);
+  const mat = new THREE.MeshPhysicalMaterial({
+    color: C.yellow,
+    metalness: 0.4,
+    roughness: 0.2,
+    emissive: C.yellow,
+    emissiveIntensity: 0.6,
+    clearcoat: 1.0,
+  });
+  const sphere = new THREE.Mesh(geo, mat);
+  group.add(sphere);
+
+  // 発光
+  const glowGeo = new THREE.SphereGeometry(BALL_R * 1.8, 16, 16);
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: C.yellow,
+    transparent: true,
+    opacity: 0.15,
+    depthWrite: false,
+  });
+  ballGlow = new THREE.Mesh(glowGeo, glowMat);
+  group.add(ballGlow);
+
+  // ポイントライト
+  const light = new THREE.PointLight(C.yellow, 0.8, 10);
+  group.add(light);
+
+  group.position.set(0, -0.8, PADDLE_Z - 2);
+  scene.add(group);
+  ball = group;
+}
+
+// ================================================================
+//  ブロック
+// ================================================================
+function createBlocks() {
+  blocks = [];
+  const totalW = BLOCK_COLS * (BLOCK_W + BLOCK_GAP) - BLOCK_GAP;
+  const startX = -totalW / 2 + BLOCK_W / 2;
+  const startZ = WALL_TOP + 4;
+
+  // 色パターン — 帝国カラー（行ごとに変化）
+  const rowColors = [
+    { color: 0xcc2222, emissive: 0x880000, name: 'red'  },    // 赤
+    { color: 0x888899, emissive: 0x334455, name: 'grey' },    // 帝国グレー
+    { color: 0xcc2222, emissive: 0x880000, name: 'red'  },    // 赤
+    { color: 0x556688, emissive: 0x223344, name: 'steel' },   // スチール
+    { color: 0x333344, emissive: 0x111122, name: 'dark' },    // ダーク
+  ];
+
+  for (let r = 0; r < BLOCK_ROWS; r++) {
+    const rc = rowColors[r % rowColors.length];
+    for (let c = 0; c < BLOCK_COLS; c++) {
+      const geo = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
+      const mat = new THREE.MeshPhysicalMaterial({
+        color: rc.color,
+        metalness: 0.85,
+        roughness: 0.15,
+        emissive: rc.emissive,
+        emissiveIntensity: 0.2,
+        clearcoat: 0.5,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(
+        startX + c * (BLOCK_W + BLOCK_GAP),
+        -0.3,
+        startZ + r * (BLOCK_D + BLOCK_GAP + 0.2),
+      );
+      mesh.userData = { row: r, col: c, points: (BLOCK_ROWS - r) * 10 };
+      scene.add(mesh);
+      blocks.push(mesh);
+
+      // 上面にうっすら光るエッジ
+      const edgeGeo = new THREE.BoxGeometry(BLOCK_W + 0.05, 0.02, BLOCK_D + 0.05);
+      const edgeMat = new THREE.MeshBasicMaterial({
+        color: C.blue,
+        transparent: true,
+        opacity: 0.08,
+        depthWrite: false,
+      });
+      const edge = new THREE.Mesh(edgeGeo, edgeMat);
+      edge.position.y = BLOCK_H / 2;
+      mesh.add(edge);
+    }
+  }
+}
+
+// ================================================================
+//  操作
+// ================================================================
+function setupControls() {
+  // マウス
+  window.addEventListener('mousemove', e => {
+    if (gameOver || gameClear || !renderer) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const target = nx * (FIELD_W / 2 - PADDLE_W / 2 + 0.5);
+    paddle.position.x = clamp(target, WALL_L + PADDLE_W / 2, WALL_R - PADDLE_W / 2);
+  });
+
+  // タッチ
+  window.addEventListener('touchmove', e => {
+    if (gameOver || gameClear || !renderer) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    const nx = ((e.touches[0].clientX - rect.left) / rect.width) * 2 - 1;
+    const target = nx * (FIELD_W / 2 - PADDLE_W / 2 + 0.5);
+    paddle.position.x = clamp(target, WALL_L + PADDLE_W / 2, WALL_R - PADDLE_W / 2);
+  }, { passive: true });
+
+  // キーボード
+  const keys = {};
+  window.addEventListener('keydown', e => {
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+      e.preventDefault();
+      keys[e.code] = true;
+    }
+  });
+  window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+  (function keyLoop() {
+    if (paddle && !gameOver && !gameClear) {
+      const speed = 0.55;
+      if (keys['ArrowLeft'])
+        paddle.position.x = Math.max(WALL_L + PADDLE_W / 2, paddle.position.x - speed);
+      if (keys['ArrowRight'])
+        paddle.position.x = Math.min(WALL_R - PADDLE_W / 2, paddle.position.x + speed);
+    }
+    requestAnimationFrame(keyLoop);
+  })();
+}
+
+// ================================================================
+//  ボール発射 & リセット
+// ================================================================
+function launchBall() {
+  ball.position.set(paddle.position.x, -0.8, PADDLE_Z - 2);
+  const angle = (Math.random() - 0.5) * 0.8 - Math.PI / 2; // ほぼ上向き
+  ballVel.set(
+    Math.cos(angle) * BALL_SPEED_INIT,
+    0,
+    Math.sin(angle) * BALL_SPEED_INIT,
+  );
+  // Z方向は必ず奥へ
+  if (ballVel.z > 0) ballVel.z *= -1;
+}
+
+function resetGame() {
+  // ブロック復活
+  blocks.forEach(b => { b.visible = true; });
+  // ステート
+  score     = 0;
+  combo     = 0;
+  lives     = MAX_LIVES;
+  gameOver  = false;
+  gameClear = false;
+  updateHUD();
+  hideMessage();
+  launchBall();
+  hud.classList.add('visible');
+}
+
+// ================================================================
+//  HUD 更新
+// ================================================================
+function updateHUD() {
+  hudScore.textContent = score;
+  // ライフ表示
+  const lifeDots = document.querySelectorAll('.life');
+  lifeDots.forEach((dot, i) => {
+    dot.classList.toggle('active', i < lives);
+    if (i >= lives) dot.classList.remove('lost');
+  });
+  // コンボ
+  if (combo >= 2) {
+    hudCombo.classList.remove('hidden');
+    comboCount.textContent = combo;
+    hudCombo.classList.add('pop');
+    setTimeout(() => hudCombo.classList.remove('pop'), 150);
+  } else {
+    hudCombo.classList.add('hidden');
+  }
+}
+
+// ================================================================
+//  メッセージ
+// ================================================================
+function showMessage(title, sub, showBtn = false) {
+  msgTitle.textContent = title;
+  msgSub.textContent   = sub;
+  msgBtn.classList.toggle('hidden', !showBtn);
+  msgBox.classList.remove('hidden');
+}
+
+function hideMessage() {
+  msgBox.classList.add('hidden');
+}
+
+// ================================================================
+//  パーティクル（ブロック破壊エフェクト）
+// ================================================================
+function spawnParticles(pos, color, count = 12) {
+  for (let i = 0; i < count; i++) {
+    const geo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+    const mat = new THREE.MeshBasicMaterial({
+      color,
+      transparent: true,
+      opacity: 1,
+      depthWrite: false,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(pos);
+    mesh.userData.vel = new THREE.Vector3(
+      (Math.random() - 0.5) * 0.4,
+      Math.random() * 0.3 + 0.1,
+      (Math.random() - 0.5) * 0.4,
+    );
+    mesh.userData.life = 1.0;
+    mesh.userData.decay = 0.01 + Math.random() * 0.02;
+    scene.add(mesh);
+    particles.push(mesh);
+  }
+}
+
+function updateParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.position.add(p.userData.vel);
+    p.userData.vel.y -= 0.005; // 重力
+    p.userData.life -= p.userData.decay;
+    p.material.opacity = Math.max(0, p.userData.life);
+    p.rotation.x += 0.1;
+    p.rotation.z += 0.08;
+    if (p.userData.life <= 0) {
+      scene.remove(p);
+      p.geometry.dispose();
+      p.material.dispose();
+      particles.splice(i, 1);
+    }
+  }
+}
+
+// ================================================================
+//  ボールトレイル
+// ================================================================
+function spawnTrail() {
+  const geo = new THREE.SphereGeometry(BALL_R * 0.5, 8, 8);
+  const mat = new THREE.MeshBasicMaterial({
+    color: C.yellow,
+    transparent: true,
+    opacity: 0.3,
+    depthWrite: false,
+  });
+  const t = new THREE.Mesh(geo, mat);
+  t.position.copy(ball.position);
+  t.userData.life = 1.0;
+  scene.add(t);
+  trailParts.push(t);
+}
+
+function updateTrail() {
+  for (let i = trailParts.length - 1; i >= 0; i--) {
+    const t = trailParts[i];
+    t.userData.life -= 0.06;
+    t.material.opacity = t.userData.life * 0.25;
+    t.scale.setScalar(t.userData.life);
+    if (t.userData.life <= 0) {
+      scene.remove(t);
+      t.geometry.dispose();
+      t.material.dispose();
+      trailParts.splice(i, 1);
+    }
+  }
+}
+
+// ================================================================
+//  メインロジック — ボール更新
+// ================================================================
+function updateBall() {
+  if (gameOver || gameClear || paused) return;
+
+  ball.position.x += ballVel.x;
+  ball.position.z += ballVel.z;
+
+  // 壁反射（左右）
+  if (ball.position.x < WALL_L + BALL_R) {
+    ballVel.x = Math.abs(ballVel.x);
+    ball.position.x = WALL_L + BALL_R;
+    spawnWallSpark(ball.position, 'left');
+  }
+  if (ball.position.x > WALL_R - BALL_R) {
+    ballVel.x = -Math.abs(ballVel.x);
+    ball.position.x = WALL_R - BALL_R;
+    spawnWallSpark(ball.position, 'right');
+  }
+
+  // 壁反射（奥）
+  if (ball.position.z < WALL_TOP + BALL_R) {
+    ballVel.z = Math.abs(ballVel.z);
+    ball.position.z = WALL_TOP + BALL_R;
+    spawnWallSpark(ball.position, 'top');
+  }
+
+  // パドル反射
+  const paddleHalfW = PADDLE_W / 2 + 0.3;
+  if (
+    ballVel.z > 0 &&
+    ball.position.z > paddle.position.z - 0.8 &&
+    ball.position.z < paddle.position.z + 0.8 &&
+    ball.position.x > paddle.position.x - paddleHalfW &&
+    ball.position.x < paddle.position.x + paddleHalfW
+  ) {
+    ballVel.z = -Math.abs(ballVel.z);
+    // パドル上のヒット位置で角度変化
+    const offset = (ball.position.x - paddle.position.x) / paddleHalfW;
+    ballVel.x += offset * 0.08;
+    // 速度上限
+    const spd = Math.sqrt(ballVel.x ** 2 + ballVel.z ** 2);
+    if (spd > BALL_SPEED_MAX) {
+      ballVel.x *= BALL_SPEED_MAX / spd;
+      ballVel.z *= BALL_SPEED_MAX / spd;
+    }
+    combo = 0; // パドルに戻るとコンボリセット
+    updateHUD();
+    // パドルヒットの光フラッシュ
+    flashPaddle();
+  }
+
+  // ブロック当たり判定
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    const blk = blocks[i];
+    if (!blk.visible) continue;
+    const dx = Math.abs(ball.position.x - blk.position.x);
+    const dz = Math.abs(ball.position.z - blk.position.z);
+    if (dx < BLOCK_W / 2 + BALL_R * 0.7 && dz < BLOCK_D / 2 + BALL_R * 0.7) {
+      // 破壊
+      blk.visible = false;
+      // 反射方向決定
+      if (dx / (BLOCK_W / 2) > dz / (BLOCK_D / 2)) {
+        ballVel.x *= -1;
+      } else {
+        ballVel.z *= -1;
+      }
+      // スコア & コンボ
+      combo++;
+      const pts = blk.userData.points * (combo >= 2 ? combo : 1);
+      score += pts;
+      updateHUD();
+      // パーティクル
+      spawnParticles(blk.position.clone(), blk.material.color.getHex(), 14);
+      // 少し加速
+      const spd = Math.sqrt(ballVel.x ** 2 + ballVel.z ** 2);
+      const newSpd = Math.min(spd * 1.01, BALL_SPEED_MAX);
+      ballVel.multiplyScalar(newSpd / spd);
+      break; // 1フレーム1ブロック
+    }
+  }
+
+  // クリア判定
+  if (blocks.every(b => !b.visible)) {
+    gameClear = true;
+    showMessage('VICTORY', `THE FORCE IS WITH YOU — SCORE: ${score}`, true);
+  }
+
+  // 落下 → ライフ減少
+  if (ball.position.z > DEAD_Z) {
+    lives--;
+    updateHUD();
+    // ライフロストアニメ
+    const lifeDots = document.querySelectorAll('.life');
+    if (lifeDots[lives]) {
+      lifeDots[lives].classList.add('lost');
+    }
+    if (lives <= 0) {
+      gameOver = true;
+      showMessage('GAME OVER', `SCORE: ${score}`, true);
+    } else {
+      combo = 0;
+      updateHUD();
+      launchBall();
+    }
+  }
+}
+
+// ================================================================
+//  小エフェクト
+// ================================================================
+function spawnWallSpark(pos, _side) {
+  spawnParticles(pos.clone(), C.blue, 5);
+}
+
+function flashPaddle() {
+  if (!paddle) return;
+  const bar = paddle.children[0];
+  if (!bar || !bar.material) return;
+  const orig = bar.material.emissiveIntensity;
+  bar.material.emissiveIntensity = 1.5;
+  setTimeout(() => { bar.material.emissiveIntensity = orig; }, 100);
+}
+
+// ================================================================
+//  アニメーションループ
+// ================================================================
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+
+  updateBall();
+  updateParticles();
+
+  // トレイル
+  if (!gameOver && !gameClear) spawnTrail();
+  updateTrail();
+
+  // 星のゆっくり回転
+  if (starField) starField.rotation.y += 0.00008;
+
+  // ボールグロー脈動
+  if (ballGlow) {
+    const t = clock.getElapsedTime();
+    ballGlow.material.opacity = 0.1 + Math.sin(t * 4) * 0.05;
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ================================================================
+//  リサイズ
+// ================================================================
+function onResize() {
+  if (!renderer || !camera) return;
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+
+  if (w / h < 0.8) {
+    camera.fov = 78;
+    camera.position.set(0, 22, 52);
+  } else if (w / h < 1.2) {
+    camera.fov = 65;
+    camera.position.set(0, 18, 42);
+  } else {
+    camera.fov = 58;
+    camera.position.set(0, 16, 38);
+  }
+  camera.lookAt(0, 0, 2);
+  camera.updateProjectionMatrix();
+}
+
+// ================================================================
+//  ユーティリティ
+// ================================================================
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}

@@ -1,133 +1,405 @@
-#body, body {
-  min-height: 100vh;
-  min-width: 100vw;
-  margin: 0;
-  padding: 0;
-  /* サイバー＆アイアンマン風グラデーション背景 */
+/* ===== STAR BREAKER — Star Wars Theme ===== */
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+
+:root {
+  --sw-yellow: #FFE81F;
+  --sw-blue: #4fc3f7;
+  --sw-blue-dark: #0a2540;
+  --sw-red: #ff3333;
+  --sw-green: #66ff66;
+  --sw-bg: #000000;
+  --sw-panel: rgba(10, 37, 64, 0.85);
+  --sw-glow: 0 0 20px rgba(79, 195, 247, 0.4);
+  --font-title: 'Orbitron', 'Segoe UI', sans-serif;
+  --font-body: 'Exo 2', 'Segoe UI', sans-serif;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--sw-bg);
+  font-family: var(--font-body);
+  color: #c0d0e0;
+  cursor: default;
+}
+
+/* ===== ゲームコンテナ ===== */
+#game-container {
+  position: relative;
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+
+/* ===== スタート画面 ===== */
+#start-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  transition: opacity 0.8s ease;
+}
+
+.stars-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background:
-    repeating-linear-gradient(135deg, #222 0 2px, transparent 2px 40px),
-    repeating-linear-gradient(45deg, #222 0 2px, transparent 2px 40px),
-    radial-gradient(ellipse at 50% 30%, #23272b 0%, #181c1f 60%, #0d1012 100%),
-    linear-gradient(120deg, #ff1744 0%, #ffe082 30%, #00e5ff 100%);
-  background-blend-mode: overlay, overlay, normal, normal;
+    radial-gradient(1px 1px at 10% 20%, #fff 50%, transparent),
+    radial-gradient(1px 1px at 30% 70%, #aaccff 50%, transparent),
+    radial-gradient(1.5px 1.5px at 50% 10%, #fff 50%, transparent),
+    radial-gradient(1px 1px at 70% 40%, #aaccff 50%, transparent),
+    radial-gradient(1px 1px at 90% 80%, #fff 50%, transparent),
+    radial-gradient(1.5px 1.5px at 20% 90%, #88aadd 50%, transparent),
+    radial-gradient(1px 1px at 60% 60%, #fff 50%, transparent),
+    radial-gradient(1px 1px at 80% 15%, #aaccff 50%, transparent),
+    radial-gradient(1px 1px at 45% 45%, #fff 50%, transparent),
+    radial-gradient(1px 1px at 15% 55%, #88aadd 50%, transparent);
+  animation: starsDrift 60s linear infinite;
+}
+
+@keyframes starsDrift {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-20px); }
+}
+
+.start-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: fadeInUp 1.2s ease-out;
+}
+
+@keyframes fadeInUp {
+  0%   { opacity: 0; transform: translateY(40px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.start-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--sw-blue);
+  letter-spacing: 0.35em;
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: subtitleFade 1.5s ease 0.5s forwards;
+}
+
+@keyframes subtitleFade {
+  0%   { opacity: 0; }
+  100% { opacity: 0.9; }
+}
+
+.start-title {
+  font-family: var(--font-title);
+  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 900;
+  color: var(--sw-yellow);
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+  text-shadow:
+    0 0 40px rgba(255, 232, 31, 0.5),
+    0 0 80px rgba(255, 232, 31, 0.2),
+    0 4px 20px rgba(0,0,0,0.8);
+  margin-bottom: 0.6rem;
+}
+
+.start-version {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--sw-blue);
+  letter-spacing: 0.25em;
+  text-shadow: 0 0 12px rgba(79,195,247,0.5);
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+}
+
+.start-description {
+  font-size: 1rem;
+  color: #8899aa;
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+  letter-spacing: 0.08em;
+}
+
+#start-btn {
+  font-family: var(--font-title);
+  font-size: 1rem;
+  color: #000;
+  background: var(--sw-yellow);
+  border: none;
+  border-radius: 50px;
+  padding: 16px 56px;
+  cursor: pointer;
+  letter-spacing: 0.2em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.25s ease;
+  box-shadow:
+    0 0 30px rgba(255, 232, 31, 0.3),
+    0 4px 20px rgba(0,0,0,0.5);
   position: relative;
   overflow: hidden;
 }
 
-body::before {
+#start-btn::before {
   content: '';
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  pointer-events: none;
-  z-index: 0;
-  /* アイアンマンのアーク・リアクター風の光 */
-  background:
-    radial-gradient(circle at 50% 80%, #00e5ff55 0%, #00e5ff00 60%),
-    radial-gradient(circle at 50% 20%, #ff174455 0%, #ff174400 60%),
-    radial-gradient(circle at 80% 50%, #ffe08244 0%, #ffe08200 60%);
-  mix-blend-mode: lighten;
+  position: absolute;
+  inset: -2px;
+  border-radius: 52px;
+  background: linear-gradient(135deg, var(--sw-yellow), transparent, var(--sw-yellow));
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
 }
 
-body::after {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  pointer-events: none;
-  z-index: 0;
-  /* サイバーな光るライン */
-  background:
-    linear-gradient(90deg, transparent 95%, #00e5ff33 100%),
-    linear-gradient(180deg, transparent 90%, #ff174433 100%);
-  mix-blend-mode: screen;
+#start-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow:
+    0 0 50px rgba(255, 232, 31, 0.5),
+    0 8px 30px rgba(0,0,0,0.5);
 }
-#game-version {
+
+#start-btn:hover::before {
+  opacity: 1;
+}
+
+#start-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-icon {
+  font-size: 0.9em;
+}
+
+.btn-text {
+  font-weight: 700;
+}
+
+.start-controls {
+  margin-top: 2.5rem;
+  display: flex;
+  gap: 2rem;
+  opacity: 0.45;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+}
+
+.control-item {
+  color: #6688aa;
+}
+
+/* ===== HUD ===== */
+#hud {
   position: absolute;
-  top: 68px;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 32px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
-  #game-container {
-    width: 100vw;
-    height: 100vh;
-    min-height: 100vh;
-    min-width: 100vw;
-    display: flex;
+
+#hud.visible {
+  opacity: 1;
+}
+
+#hud-left, #hud-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hud-label {
+  font-family: var(--font-title);
+  font-size: 0.65rem;
+  color: var(--sw-blue);
+  letter-spacing: 0.25em;
+  opacity: 0.7;
+}
+
+#hud-score {
+  font-family: var(--font-title);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--sw-yellow);
+  text-shadow: 0 0 16px rgba(255, 232, 31, 0.4);
+  min-width: 80px;
+}
+
+#hud-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#hud-combo {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sw-blue);
+  text-shadow: 0 0 20px rgba(79, 195, 247, 0.6);
+  letter-spacing: 0.12em;
+  transition: all 0.2s ease;
+}
+
+#hud-combo.pop {
+  transform: scale(1.3);
+  color: #fff;
+}
+
+#hud-right {
+  align-items: flex-end;
+}
+
+#hud-lives {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.life {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #223344;
+  border: 1.5px solid #334455;
+  transition: all 0.3s ease;
+}
+
+.life.active {
+  background: var(--sw-blue);
+  border-color: var(--sw-blue);
+  box-shadow: 0 0 10px rgba(79, 195, 247, 0.6);
+}
+
+.life.lost {
+  animation: lifeLost 0.5s ease forwards;
+}
+
+@keyframes lifeLost {
+  0%   { background: var(--sw-red); box-shadow: 0 0 20px var(--sw-red); transform: scale(1.3); }
+  100% { background: #223344; box-shadow: none; transform: scale(1); }
+}
+
+/* ===== ゲームメッセージ ===== */
+#game-message {
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: opacity 0.5s ease;
+}
+
+#game-message.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#msg-title {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 900;
+  color: var(--sw-yellow);
+  letter-spacing: 0.15em;
+  text-shadow:
+    0 0 40px rgba(255, 232, 31, 0.5),
+    0 0 80px rgba(255, 232, 31, 0.2);
+  margin-bottom: 0.5rem;
+  animation: msgPulse 2s ease-in-out infinite;
+}
+
+@keyframes msgPulse {
+  0%, 100% { text-shadow: 0 0 40px rgba(255,232,31,0.5), 0 0 80px rgba(255,232,31,0.2); }
+  50%      { text-shadow: 0 0 60px rgba(255,232,31,0.7), 0 0 100px rgba(255,232,31,0.4); }
+}
+
+#msg-sub {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--sw-blue);
+  letter-spacing: 0.2em;
+  margin-bottom: 2rem;
+  opacity: 0.8;
+}
+
+#msg-btn {
+  font-family: var(--font-title);
+  font-size: 0.9rem;
+  color: #000;
+  background: var(--sw-yellow);
+  border: none;
+  border-radius: 50px;
+  padding: 14px 48px;
+  cursor: pointer;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 30px rgba(255, 232, 31, 0.3);
+}
+
+#msg-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 50px rgba(255, 232, 31, 0.5);
+}
+
+#msg-btn.hidden {
+  display: none;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== カスタムカーソル（ゲーム中） ===== */
+#game-container canvas {
+  cursor: none;
+}
+
+#start-overlay,
+#start-overlay * {
+  cursor: default;
+}
+
+#start-btn {
+  cursor: pointer !important;
+}
+
+/* ===== レスポンシブ ===== */
+@media (max-width: 600px) {
+  .start-title {
+    font-size: clamp(2.2rem, 12vw, 4rem);
+  }
+  .start-controls {
     flex-direction: column;
+    gap: 0.5rem;
     align-items: center;
-    justify-content: center;
-    #game-container {
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      background: none;
-      overflow: hidden;
-    }
-    #game-canvas {
-      background: #23272b;
-      width: 100vw;
-      height: 100vh;
-      max-width: 100vw;
-      max-height: 100vh;
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      border-radius: 18px;
-      box-shadow: 0 4px 32px #ff1744cc, 0 0 32px #00e5ff44;
-      border: 2.5px solid #ff1744;
-      z-index: 1;
-    }
-    #start-overlay {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: radial-gradient(ellipse at center, #181c1f 60%, #0d1012 100%);
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .start-title {
-      font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
-      font-size: 2.8rem;
-      color: #ffe082;
-      letter-spacing: 0.18em;
-      text-shadow: 0 0 32px #ff1744, 0 0 64px #00e5ff, 0 2px 24px #000a;
-      margin-bottom: 0.5em;
-      text-align: center;
-    }
-    .start-version {
-      color: #ffd700;
-      font-size: 1.1rem;
-      letter-spacing: 0.12em;
-      text-shadow: 0 2px 8px #000a, 0 0 8px #ffd70099;
-      margin-bottom: 2em;
-      text-align: center;
-    }
-    #start-btn {
-      font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
-      font-size: 1.5rem;
-      color: #fff;
-      background: linear-gradient(90deg, #ff1744 0%, #ffe082 100%);
-      border: none;
-      border-radius: 32px;
-      padding: 18px 64px;
-      box-shadow: 0 0 32px #ff1744cc, 0 0 32px #00e5ff44;
-      cursor: pointer;
-      letter-spacing: 0.18em;
-      transition: transform 0.15s, box-shadow 0.15s;
-      margin-top: 24px;
-      text-align: center;
-    }
-    #start-btn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 48px #ff1744cc, 0 0 48px #00e5ff88;
-    }
-    #start-btn:active {
-      transform: scale(0.95);
-      box-shadow: 0 0 16px #ff1744cc, 0 0 16px #00e5ff44;
-    }   
+  }
+  #hud {
+    padding: 12px 16px;
+  }
+  #hud-score {
+    font-size: 1.3rem;
+  }
 }
