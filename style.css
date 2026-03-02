@@ -201,6 +201,172 @@ html, body {
   color: #6688aa;
 }
 
+.start-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+#stage-select-btn {
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  color: var(--sw-blue);
+  background: transparent;
+  border: 1.5px solid var(--sw-blue);
+  border-radius: 50px;
+  padding: 10px 36px;
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+
+#stage-select-btn:hover {
+  background: rgba(79, 195, 247, 0.15);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(79, 195, 247, 0.3);
+}
+
+/* ===== ステージセレクト ===== */
+#stage-select {
+  position: absolute;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+  transition: opacity 0.4s ease;
+}
+
+#stage-select.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ss-header {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.ss-title {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--sw-yellow);
+  letter-spacing: 0.2em;
+  text-shadow: 0 0 20px rgba(255, 232, 31, 0.4);
+}
+
+#ss-back-btn {
+  font-size: 1.2rem;
+  color: var(--sw-blue);
+  background: none;
+  border: 1.5px solid var(--sw-blue);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+#ss-back-btn:hover {
+  background: rgba(79, 195, 247, 0.2);
+}
+
+#ss-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.ss-card {
+  background: var(--sw-panel);
+  border: 1.5px solid rgba(79, 195, 247, 0.2);
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ss-card:hover:not(.locked) {
+  border-color: var(--sw-blue);
+  box-shadow: var(--sw-glow);
+  transform: translateY(-2px);
+}
+
+.ss-card.locked {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+.ss-card.cleared {
+  border-color: rgba(102, 255, 102, 0.3);
+}
+
+.ss-card .ss-stage-num {
+  font-family: var(--font-title);
+  font-size: 0.65rem;
+  color: var(--sw-blue);
+  letter-spacing: 0.2em;
+  opacity: 0.7;
+}
+
+.ss-card .ss-stage-name {
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.1em;
+}
+
+.ss-card.cleared .ss-stage-name {
+  color: var(--sw-green);
+}
+
+.ss-card .ss-stage-desc {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: #8899aa;
+  letter-spacing: 0.05em;
+}
+
+.ss-card .ss-stage-status {
+  font-family: var(--font-title);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  margin-top: 4px;
+}
+
+.ss-card.cleared .ss-stage-status {
+  color: var(--sw-green);
+}
+
+.ss-card.locked .ss-stage-status {
+  color: #556677;
+}
+
+.ss-card:not(.locked):not(.cleared) .ss-stage-status {
+  color: var(--sw-yellow);
+}
 
 /* ===== HUD ===== */
 #hud {

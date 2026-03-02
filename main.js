@@ -181,6 +181,39 @@ const msgSub     = document.getElementById('msg-sub');
 const msgBtn     = document.getElementById('msg-btn');
 const msgTitleBtn = document.getElementById('msg-title-btn');
 const stageTransition = document.getElementById('stage-transition');
+const stageSelectBtn = document.getElementById('stage-select-btn');
+const stageSelectPanel = document.getElementById('stage-select');
+const ssGrid = document.getElementById('ss-grid');
+const ssBackBtn = document.getElementById('ss-back-btn');
+
+// ─── セーブデータ（localStorage）───────────────
+const SAVE_KEY = 'starbreaker_progress';
+function loadProgress() {
+  try {
+    const data = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (data && Array.isArray(data.cleared)) return data;
+  } catch (e) {}
+  return { cleared: [], highScore: 0 };
+}
+function saveProgress() {
+  localStorage.setItem(SAVE_KEY, JSON.stringify(progressData));
+}
+let progressData = loadProgress();
+
+function markStageCleared(stageIndex) {
+  if (!progressData.cleared.includes(stageIndex)) {
+    progressData.cleared.push(stageIndex);
+  }
+  if (score > progressData.highScore) {
+    progressData.highScore = score;
+  }
+  saveProgress();
+}
+
+function isStageUnlocked(stageIndex) {
+  if (stageIndex === 0) return true;
+  return progressData.cleared.includes(stageIndex - 1);
+}
 
 // ================================================================
 //  スタート画面
@@ -198,6 +231,64 @@ startBtn.addEventListener('click', () => {
     hud.classList.add('visible');
   }, 800);
 });
+
+// ─── ステージセレクト ───
+stageSelectBtn.addEventListener('click', () => {
+  buildStageSelectUI();
+  stageSelectPanel.classList.remove('hidden');
+});
+
+ssBackBtn.addEventListener('click', () => {
+  stageSelectPanel.classList.add('hidden');
+});
+
+function buildStageSelectUI() {
+  ssGrid.innerHTML = '';
+  STAGES.forEach((stage, i) => {
+    const unlocked = isStageUnlocked(i);
+    const cleared = progressData.cleared.includes(i);
+    const card = document.createElement('div');
+    card.className = `ss-card${cleared ? ' cleared' : ''}${!unlocked ? ' locked' : ''}`;
+    card.innerHTML = `
+      <div class="ss-stage-num">STAGE ${i + 1}</div>
+      <div class="ss-stage-name">${unlocked ? stage.name : '???'}</div>
+      <div class="ss-stage-desc">${unlocked ? stage.desc : '前ステージをクリアせよ'}</div>
+      <div class="ss-stage-status">${cleared ? '✓ CLEARED' : unlocked ? '▶ PLAY' : '🔒 LOCKED'}</div>
+    `;
+    if (unlocked) {
+      card.addEventListener('click', () => {
+        stageSelectPanel.classList.add('hidden');
+        startFromStage(i);
+      });
+    }
+    ssGrid.appendChild(card);
+  });
+}
+
+function startFromStage(stageIndex) {
+  overlay.style.opacity = '0';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    if (!started) {
+      initGame(stageIndex);
+      started = true;
+    } else {
+      // 既に初期化済みならステージをセットしてリセット
+      currentStage = stageIndex;
+      createBlocks();
+      score = 0;
+      combo = 0;
+      lives = MAX_LIVES;
+      gameOver = false;
+      gameClear = false;
+      paused = false;
+      updateHUD();
+      hideMessage();
+      launchBall();
+    }
+    hud.classList.add('visible');
+  }, 800);
+}
 
 msgBtn.addEventListener('click', () => {
   hideMessage();
@@ -217,7 +308,7 @@ msgTitleBtn.addEventListener('click', () => {
 // ================================================================
 //  初期化
 // ================================================================
-function initGame() {
+function initGame(startStage = 0) {
   clock = new THREE.Clock();
 
   // ─ レンダラー ─
@@ -271,7 +362,7 @@ function initGame() {
   createBall();
 
   // ─ ブロック ─
-  currentStage = 0;
+  currentStage = startStage;
   createBlocks();
 
   // ─ 操作 ─
@@ -749,6 +840,8 @@ function resetGame() {
 // ステージクリア → 次ステージへ
 function advanceStage() {
   paused = true; // 遷移中はゲーム停止
+  // クリアしたステージを保存
+  markStageCleared(currentStage);
   currentStage++;
   if (currentStage >= STAGES.length) {
     // 全ステージクリア！
