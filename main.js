@@ -198,7 +198,7 @@ function init3D() {
     0.1,
     1000
   );
-  camera.position.set(0, 10, 40);
+  camera.position.set(0, 10, 32);
   camera.lookAt(0, 0, 0);
 
   // ライト
@@ -319,13 +319,13 @@ function init3D() {
       camera.aspect = w / h;
       // アスペクト比に応じてFOVとカメラ位置を調整
       if (w / h < 1) {
-        // 縦長画面：FOV広げてカメラ遠ざける
+        // 縦長画面：FOV広げてカメラをやや手前に
         camera.fov = 80;
-        camera.position.set(0, 16, 60);
+        camera.position.set(0, 16, 48);
       } else {
         // 横長・標準
         camera.fov = 60;
-        camera.position.set(0, 10, 40);
+        camera.position.set(0, 10, 32);
       }
       camera.updateProjectionMatrix();
     }
