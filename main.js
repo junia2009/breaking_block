@@ -262,20 +262,7 @@ function init3D() {
   paddle.position.set(0, -1.15, 20);
   paddle.rotation.z = Math.PI / 2; // 横向きに
   scene.add(paddle);
-  // 中央に光る横長ライン
-  const paddleLineGeo = new THREE.BoxGeometry(5.2, 0.09, 1.22);
-  const paddleLineMat = new THREE.MeshPhysicalMaterial({
-    color: 0x00e5ff,
-    metalness: 0.7,
-    roughness: 0.12,
-    emissive: 0x00e5ff,
-    emissiveIntensity: 0.7,
-    transparent: true,
-    opacity: 0.85
-  });
-  const paddleLine = new THREE.Mesh(paddleLineGeo, paddleLineMat);
-  paddleLine.position.set(0, -1.15, 20.62);
-  scene.add(paddleLine);
+  // ...paddleLine削除...
 
   // ボール（紺色・発光なし）
   const ballGeo = new THREE.SphereGeometry(0.6, 32, 32);
