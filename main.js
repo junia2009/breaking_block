@@ -168,6 +168,7 @@ let starField;
 // ─── DOM ─────────────────────────────────────────
 const container  = document.getElementById('game-container');
 const overlay    = document.getElementById('start-overlay');
+const sfContainer = document.getElementById('sf-container');
 const startBtn   = document.getElementById('start-btn');
 const hud        = document.getElementById('hud');
 const hudScore   = document.getElementById('hud-score');
@@ -216,9 +217,98 @@ function isStageUnlocked(stageIndex) {
 }
 
 // ================================================================
-//  スタート画面
+//  スタート画面 — 戦闘機アニメーション
+// ================================================================
+let sfInterval = null;
+let laserTimeout = null;
+
+function spawnStarfighter() {
+  if (!sfContainer) return;
+  const isXwing = Math.random() < 0.55;
+  const el = document.createElement('div');
+  el.className = `starfighter ${isXwing ? 'sf-xwing' : 'sf-tie'}`;
+
+  const y = 5 + Math.random() * 90;
+  const scale = 0.7 + Math.random() * 1.8;
+  const duration = 5 + Math.random() * 7;
+  // X-wing→右方向, TIE→左方向
+  const goRight = isXwing;
+  const startX = goRight ? -3 : 103;
+  const endX   = goRight ? 103 : -3;
+  const angle  = (Math.random() - 0.5) * 15;
+  const flip   = goRight ? '' : ' scaleX(-1)';
+
+  el.style.top  = y + '%';
+  el.style.left = startX + '%';
+  el.style.transform = `scale(${scale}) rotate(${angle}deg)${flip}`;
+  el.style.opacity = String(0.35 + scale * 0.25);
+
+  sfContainer.appendChild(el);
+
+  requestAnimationFrame(() => {
+    el.style.transition = `left ${duration}s linear`;
+    el.style.left = endX + '%';
+  });
+
+  setTimeout(() => el.remove(), duration * 1000 + 200);
+}
+
+function spawnLaser() {
+  if (!sfContainer) return;
+  const isGreen = Math.random() < 0.5;
+  const el = document.createElement('div');
+  el.className = `starfighter sf-laser ${isGreen ? 'green' : 'red'}`;
+
+  const y = 8 + Math.random() * 84;
+  const goRight = isGreen;
+  const startX = goRight ? -2 : 102;
+  const endX   = goRight ? 102 : -2;
+  const duration = 0.8 + Math.random() * 1.2;
+
+  el.style.top  = y + '%';
+  el.style.left = startX + '%';
+  el.style.opacity = '0.9';
+
+  sfContainer.appendChild(el);
+
+  requestAnimationFrame(() => {
+    el.style.transition = `left ${duration}s linear`;
+    el.style.left = endX + '%';
+  });
+
+  setTimeout(() => el.remove(), duration * 1000 + 100);
+}
+
+function scheduleLaser() {
+  const delay = 2000 + Math.random() * 4000;
+  laserTimeout = setTimeout(() => {
+    spawnLaser();
+    if (sfInterval) scheduleLaser();
+  }, delay);
+}
+
+function startStarfighters() {
+  if (sfInterval) return;
+  // 最初に数機出す
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => spawnStarfighter(), i * 600);
+  }
+  sfInterval = setInterval(spawnStarfighter, 1800);
+  scheduleLaser();
+}
+
+function stopStarfighters() {
+  if (sfInterval) { clearInterval(sfInterval); sfInterval = null; }
+  if (laserTimeout) { clearTimeout(laserTimeout); laserTimeout = null; }
+  if (sfContainer) sfContainer.innerHTML = '';
+}
+
+// ページ読込時に開始
+startStarfighters();
+
 // ================================================================
 startBtn.addEventListener('click', () => {
+  stopStarfighters();
   overlay.style.opacity = '0';
   setTimeout(() => {
     overlay.style.display = 'none';
@@ -266,6 +356,7 @@ function buildStageSelectUI() {
 }
 
 function startFromStage(stageIndex) {
+  stopStarfighters();
   overlay.style.opacity = '0';
   setTimeout(() => {
     overlay.style.display = 'none';
@@ -302,6 +393,7 @@ msgTitleBtn.addEventListener('click', () => {
   overlay.style.display = 'flex';
   requestAnimationFrame(() => {
     overlay.style.opacity = '1';
+    startStarfighters();
   });
 });
 

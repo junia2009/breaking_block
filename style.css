@@ -69,6 +69,94 @@ html, body {
   100% { transform: translateY(-20px); }
 }
 
+/* ===== 戦闘機アニメーション ===== */
+#sf-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.starfighter {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* X-wing: 細長いボディ＋翼＋エンジントレイル */
+.sf-xwing {
+  width: 14px;
+  height: 3px;
+  background: rgba(200, 220, 255, 0.9);
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 6px rgba(79, 195, 247, 0.8);
+}
+
+.sf-xwing::before {
+  content: '';
+  position: absolute;
+  left: 1px;
+  right: 2px;
+  top: -4px;
+  height: 11px;
+  border-top: 1px solid rgba(200, 220, 255, 0.5);
+  border-bottom: 1px solid rgba(200, 220, 255, 0.5);
+}
+
+.sf-xwing::after {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 3px;
+  background: linear-gradient(to right, transparent 0%, rgba(255, 120, 40, 0.8) 100%);
+  filter: blur(1.5px);
+}
+
+/* TIE fighter: 丸いコックピット＋サイドパネル */
+.sf-tie {
+  width: 5px;
+  height: 5px;
+  background: rgba(160, 170, 190, 0.85);
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(200, 50, 50, 0.5);
+}
+
+.sf-tie::before,
+.sf-tie::after {
+  content: '';
+  position: absolute;
+  width: 1.5px;
+  height: 12px;
+  background: rgba(160, 170, 190, 0.7);
+  top: -3.5px;
+}
+
+.sf-tie::before { left: -3px; }
+.sf-tie::after  { right: -3px; }
+
+/* レーザーボルト */
+.sf-laser {
+  height: 2px;
+  border-radius: 1px;
+  will-change: transform;
+}
+
+.sf-laser.green {
+  width: 18px;
+  background: #66ff66;
+  box-shadow: 0 0 6px rgba(102, 255, 102, 0.9), 0 0 14px rgba(102, 255, 102, 0.4);
+}
+
+.sf-laser.red {
+  width: 16px;
+  background: #ff4444;
+  box-shadow: 0 0 6px rgba(255, 68, 68, 0.9), 0 0 14px rgba(255, 68, 68, 0.4);
+}
+
 .start-content {
   position: relative;
   z-index: 1;
