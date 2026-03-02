@@ -179,6 +179,7 @@ const msgBox     = document.getElementById('game-message');
 const msgTitle   = document.getElementById('msg-title');
 const msgSub     = document.getElementById('msg-sub');
 const msgBtn     = document.getElementById('msg-btn');
+const msgTitleBtn = document.getElementById('msg-title-btn');
 const stageTransition = document.getElementById('stage-transition');
 
 // ================================================================
@@ -201,6 +202,16 @@ startBtn.addEventListener('click', () => {
 msgBtn.addEventListener('click', () => {
   hideMessage();
   resetGame();
+});
+
+msgTitleBtn.addEventListener('click', () => {
+  hideMessage();
+  hud.classList.remove('visible');
+  // スタート画面を再表示
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+  });
 });
 
 // ================================================================
@@ -805,6 +816,7 @@ function showMessage(title, sub, showBtn = false) {
   msgTitle.textContent = title;
   msgSub.textContent   = sub;
   msgBtn.classList.toggle('hidden', !showBtn);
+  msgTitleBtn.classList.toggle('hidden', !showBtn);
   msgBox.classList.remove('hidden');
 }
 

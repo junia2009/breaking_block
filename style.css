@@ -422,6 +422,12 @@ html, body {
   opacity: 0.8;
 }
 
+.msg-buttons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
 #msg-btn {
   font-family: var(--font-title);
   font-size: 0.9rem;
@@ -443,6 +449,29 @@ html, body {
 }
 
 #msg-btn.hidden {
+  display: none;
+}
+
+#msg-title-btn {
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  color: var(--sw-blue);
+  background: transparent;
+  border: 1.5px solid var(--sw-blue);
+  border-radius: 50px;
+  padding: 12px 36px;
+  cursor: pointer;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+
+#msg-title-btn:hover {
+  background: rgba(79, 195, 247, 0.15);
+  transform: scale(1.08);
+}
+
+#msg-title-btn.hidden {
   display: none;
 }
 
