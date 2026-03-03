@@ -188,12 +188,24 @@ const ssGrid = document.getElementById('ss-grid');
 const ssBackBtn = document.getElementById('ss-back-btn');
 const pauseOverlay = document.getElementById('pause-overlay');
 
+const pauseBtn = document.getElementById('pause-btn');
+
 // ─── ポーズ表示制御 ─────────────────────────────
 function showPauseOverlay() {
   if (pauseOverlay) pauseOverlay.classList.remove('hidden');
+  if (pauseBtn) {
+    pauseBtn.textContent = '▶';
+    pauseBtn.title = '再開';
+    pauseBtn.setAttribute('aria-label', 'Resume');
+  }
 }
 function hidePauseOverlay() {
   if (pauseOverlay) pauseOverlay.classList.add('hidden');
+  if (pauseBtn) {
+    pauseBtn.textContent = 'Ⅱ';
+    pauseBtn.title = '一時停止';
+    pauseBtn.setAttribute('aria-label', 'Pause');
+  }
 }
 
 // ─── セーブデータ（localStorage）───────────────
@@ -340,6 +352,18 @@ stageSelectBtn.addEventListener('click', () => {
 ssBackBtn.addEventListener('click', () => {
   stageSelectPanel.classList.add('hidden');
 });
+    // HUD一時停止ボタン
+    if (pauseBtn) {
+      pauseBtn.addEventListener('click', () => {
+        if (!started || gameOver || gameClear) return;
+        paused = !paused;
+        if (paused) {
+          showPauseOverlay();
+        } else {
+          hidePauseOverlay();
+        }
+      });
+    }
 
 function buildStageSelectUI() {
   ssGrid.innerHTML = '';

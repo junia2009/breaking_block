@@ -33,6 +33,26 @@ html, body {
   background: #000;
 }
 
+/* ===== 一時停止ボタン（HUD右上） ===== */
+#pause-btn.hud-btn {
+  margin-left: 1.2em;
+  padding: 0.3em 0.7em;
+  font-size: 2.1em;
+  font-family: var(--font-title, 'Orbitron', sans-serif);
+  color: var(--sw-yellow, #FFE81F);
+  background: rgba(10,37,64,0.85);
+  border: 2px solid var(--sw-yellow, #FFE81F);
+  border-radius: 0.4em;
+  box-shadow: 0 0 12px #FFE81F44;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  z-index: 2100;
+}
+#pause-btn.hud-btn:active {
+  background: rgba(255,232,31,0.18);
+  color: #fff;
+}
+
 /* ===== スタート画面 ===== */
 #start-overlay {
   position: absolute;
