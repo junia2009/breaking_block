@@ -1283,19 +1283,18 @@ function animate() {
   const dt = clock.getDelta();
 
   updateBall();
-  updateParticles();
-
-  // トレイル
-  if (!gameOver && !gameClear) spawnTrail();
-  updateTrail();
-
-  // 星のゆっくり回転
-  if (starField) starField.rotation.y += 0.00008;
-
-  // ボールグロー脈動
-  if (ballGlow) {
-    const t = clock.getElapsedTime();
-    ballGlow.material.opacity = 0.1 + Math.sin(t * 4) * 0.05;
+  if (!paused) {
+    updateParticles();
+    // トレイル
+    if (!gameOver && !gameClear) spawnTrail();
+    updateTrail();
+    // 星のゆっくり回転
+    if (starField) starField.rotation.y += 0.00008;
+    // ボールグロー脈動
+    if (ballGlow) {
+      const t = clock.getElapsedTime();
+      ballGlow.material.opacity = 0.1 + Math.sin(t * 4) * 0.05;
+    }
   }
 
   renderer.render(scene, camera);
