@@ -200,7 +200,11 @@ function showPauseOverlay() {
   }
 }
 function hidePauseOverlay() {
-  if (pauseOverlay) pauseOverlay.classList.add('hidden');
+  if (pauseOverlay) {
+    pauseOverlay.classList.add('hidden');
+    // 念のため display:none も直接指定
+    pauseOverlay.style.display = 'none';
+  }
   if (pauseBtn) {
     pauseBtn.textContent = 'Ⅱ';
     pauseBtn.title = '一時停止';
