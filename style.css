@@ -81,6 +81,7 @@ html, body {
   justify-content: center;
   background: rgba(0,0,0,0.45);
   transition: opacity 0.4s;
+  pointer-events: auto;
 }
 #pause-overlay.hidden {
   display: none;

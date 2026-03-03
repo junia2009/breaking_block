@@ -371,7 +371,7 @@ ssBackBtn.addEventListener('click', () => {
 });
     // HUD一時停止ボタン
     if (pauseBtn) {
-      pauseBtn.addEventListener('click', () => {
+      const pauseToggle = () => {
         if (!started || gameOver || gameClear) return;
         paused = !paused;
         if (paused) {
@@ -379,6 +379,11 @@ ssBackBtn.addEventListener('click', () => {
         } else {
           hidePauseOverlay();
         }
+      };
+      pauseBtn.addEventListener('click', pauseToggle);
+      pauseBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        pauseToggle();
       });
     }
 
