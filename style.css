@@ -48,21 +48,34 @@ html, body {
 
 .stars-bg {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(1px 1px at 10% 20%, #fff 50%, transparent),
-    radial-gradient(1px 1px at 30% 70%, #aaccff 50%, transparent),
-    radial-gradient(1.5px 1.5px at 50% 10%, #fff 50%, transparent),
-    radial-gradient(1px 1px at 70% 40%, #aaccff 50%, transparent),
-    radial-gradient(1px 1px at 90% 80%, #fff 50%, transparent),
-    radial-gradient(1.5px 1.5px at 20% 90%, #88aadd 50%, transparent),
-    radial-gradient(1px 1px at 60% 60%, #fff 50%, transparent),
-    radial-gradient(1px 1px at 80% 15%, #aaccff 50%, transparent),
-    radial-gradient(1px 1px at 45% 45%, #fff 50%, transparent),
-    radial-gradient(1px 1px at 15% 55%, #88aadd 50%, transparent);
-  animation: starsDrift 60s linear infinite;
 }
+
+/* ===== ポーズオーバーレイ ===== */
+#pause-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  transition: opacity 0.4s;
+}
+#pause-overlay.hidden {
+  display: none;
+}
+.pause-text {
+  color: var(--sw-yellow, #FFE81F);
+  font-family: var(--font-title, 'Orbitron', sans-serif);
+  font-size: 3.2rem;
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 16px #000, 0 0 32px #FFE81F88;
+  padding: 0.5em 2em;
+  border-radius: 0.3em;
+  background: rgba(0,0,0,0.25);
+  border: 2px solid #FFE81F;
+}
+/* .stars-bg の重複・誤配置CSSを削除 */
 
 @keyframes starsDrift {
   0%   { transform: translateY(0); }

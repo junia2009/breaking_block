@@ -186,6 +186,15 @@ const stageSelectBtn = document.getElementById('stage-select-btn');
 const stageSelectPanel = document.getElementById('stage-select');
 const ssGrid = document.getElementById('ss-grid');
 const ssBackBtn = document.getElementById('ss-back-btn');
+const pauseOverlay = document.getElementById('pause-overlay');
+
+// ─── ポーズ表示制御 ─────────────────────────────
+function showPauseOverlay() {
+  if (pauseOverlay) pauseOverlay.classList.remove('hidden');
+}
+function hidePauseOverlay() {
+  if (pauseOverlay) pauseOverlay.classList.add('hidden');
+}
 
 // ─── セーブデータ（localStorage）───────────────
 const SAVE_KEY = 'starbreaker_progress';
