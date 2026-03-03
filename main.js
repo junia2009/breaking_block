@@ -892,6 +892,15 @@ function setupControls() {
       e.preventDefault();
       keys[e.code] = true;
     }
+    // Pキーで一時停止/再開
+    if (e.code === 'KeyP' && started && !gameOver && !gameClear) {
+      paused = !paused;
+      if (paused) {
+        showPauseOverlay();
+      } else {
+        hidePauseOverlay();
+      }
+    }
   });
   window.addEventListener('keyup', e => { keys[e.code] = false; });
 
