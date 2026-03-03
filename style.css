@@ -574,6 +574,7 @@ html, body {
 
 #hud-right {
   align-items: flex-end;
+  pointer-events: auto;
 }
 
 #hud-lives {
