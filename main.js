@@ -893,7 +893,7 @@ function generateLayout(type, rows, cols, durableRate) {
 function setupControls() {
   // マウス
   window.addEventListener('mousemove', e => {
-    if (gameOver || gameClear || !renderer) return;
+    if (gameOver || gameClear || paused || !renderer) return;
     const rect = renderer.domElement.getBoundingClientRect();
     const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     const target = nx * (FIELD_W / 2 - PADDLE_W / 2 + 0.5);
@@ -902,7 +902,7 @@ function setupControls() {
 
   // タッチ
   window.addEventListener('touchmove', e => {
-    if (gameOver || gameClear || !renderer) return;
+    if (gameOver || gameClear || paused || !renderer) return;
     const rect = renderer.domElement.getBoundingClientRect();
     const nx = ((e.touches[0].clientX - rect.left) / rect.width) * 2 - 1;
     const target = nx * (FIELD_W / 2 - PADDLE_W / 2 + 0.5);
@@ -929,7 +929,7 @@ function setupControls() {
   window.addEventListener('keyup', e => { keys[e.code] = false; });
 
   (function keyLoop() {
-    if (paddle && !gameOver && !gameClear) {
+    if (paddle && !gameOver && !gameClear && !paused) {
       const speed = 0.55;
       if (keys['ArrowLeft'])
         paddle.position.x = Math.max(WALL_L + PADDLE_W / 2, paddle.position.x - speed);
