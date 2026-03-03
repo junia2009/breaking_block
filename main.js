@@ -187,6 +187,14 @@ const stageSelectPanel = document.getElementById('stage-select');
 const ssGrid = document.getElementById('ss-grid');
 const ssBackBtn = document.getElementById('ss-back-btn');
 const pauseOverlay = document.getElementById('pause-overlay');
+// ポーズオーバーレイ自体のタップで再開（イベントは1回だけ登録）
+if (pauseOverlay) {
+  pauseOverlay.addEventListener('pointerup', (e) => {
+    e.preventDefault();
+    if (!started || gameOver || gameClear) return;
+    if (paused) setPaused(false);
+  }, { passive: false });
+}
 
 const pauseBtn = document.getElementById('pause-btn');
 
@@ -208,16 +216,7 @@ function hidePauseOverlay() {
     pauseOverlay.classList.add('hidden');
     // display:none の直書きは排除
   }
-  // ポーズオーバーレイ自体のクリックで再開（UX向上）
-  if (pauseOverlay) {
-    pauseOverlay.addEventListener('click', () => {
-      if (!started || gameOver || gameClear) return;
-      if (paused) {
-        paused = false;
-        hidePauseOverlay();
-      }
-    });
-  }
+  // ポーズオーバーレイ自体のイベント登録は初期化時に1回だけ行う
   if (pauseBtn) {
     pauseBtn.textContent = 'Ⅱ';
     pauseBtn.title = '一時停止';
@@ -370,22 +369,26 @@ ssBackBtn.addEventListener('click', () => {
   stageSelectPanel.classList.add('hidden');
 });
     // HUD一時停止ボタン
-    if (pauseBtn) {
-      const pauseToggle = () => {
-        if (!started || gameOver || gameClear) return;
-        paused = !paused;
-        if (paused) {
-          showPauseOverlay();
-        } else {
-          hidePauseOverlay();
-        }
-      };
-      pauseBtn.addEventListener('click', pauseToggle);
-      pauseBtn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        pauseToggle();
-      });
-    }
+// ===== ポーズ制御（モバイル対応：pointerイベントで統一） =====
+function setPaused(next) {
+  if (!started || gameOver || gameClear) return;
+  paused = !!next;
+  if (paused) showPauseOverlay();
+  else hidePauseOverlay();
+}
+
+function togglePaused() {
+  setPaused(!paused);
+}
+
+// HUD一時停止ボタン
+if (pauseBtn) {
+  // click/touchend の二重発火を避けるため pointerup のみに統一
+  pauseBtn.addEventListener('pointerup', (e) => {
+    e.preventDefault();
+    togglePaused();
+  }, { passive: false });
+}
 
 function buildStageSelectUI() {
   ssGrid.innerHTML = '';

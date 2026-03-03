@@ -31,6 +31,8 @@ html, body {
   width: 100vw; height: 100vh;
   overflow: hidden;
   background: #000;
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 
 /* ===== 一時停止ボタン（HUD右上） ===== */
