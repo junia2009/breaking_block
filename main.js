@@ -192,7 +192,11 @@ const pauseBtn = document.getElementById('pause-btn');
 
 // ─── ポーズ表示制御 ─────────────────────────────
 function showPauseOverlay() {
-  if (pauseOverlay) pauseOverlay.classList.remove('hidden');
+  if (pauseOverlay) {
+    pauseOverlay.classList.remove('hidden');
+    // display のインライン指定があれば解除
+    pauseOverlay.style.removeProperty('display');
+  }
   if (pauseBtn) {
     pauseBtn.textContent = '▶';
     pauseBtn.title = '再開';
@@ -202,8 +206,17 @@ function showPauseOverlay() {
 function hidePauseOverlay() {
   if (pauseOverlay) {
     pauseOverlay.classList.add('hidden');
-    // 念のため display:none も直接指定
-    pauseOverlay.style.display = 'none';
+    // display:none の直書きは排除
+  }
+  // ポーズオーバーレイ自体のクリックで再開（UX向上）
+  if (pauseOverlay) {
+    pauseOverlay.addEventListener('click', () => {
+      if (!started || gameOver || gameClear) return;
+      if (paused) {
+        paused = false;
+        hidePauseOverlay();
+      }
+    });
   }
   if (pauseBtn) {
     pauseBtn.textContent = 'Ⅱ';
