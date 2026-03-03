@@ -911,10 +911,11 @@ function setupControls() {
 
   // キーボード
   const keys = {};
-  window.addEventListener('keydown', e => {
-    if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-      e.preventDefault();
-      keys[e.code] = true;
+    if (gameOver || gameClear || paused || !renderer) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const target = nx * (FIELD_W / 2 - PADDLE_W / 2 + 0.5);
+    paddle.position.x = clamp(target, WALL_L + PADDLE_W / 2, WALL_R - PADDLE_W / 2);
     }
     // Pキーで一時停止/再開
     if (e.code === 'KeyP' && started && !gameOver && !gameClear) {
@@ -938,11 +939,13 @@ function setupControls() {
     }
     requestAnimationFrame(keyLoop);
   })();
-}
-
-// ================================================================
-//  ボール発射 & リセット
-// ================================================================
+        window.addEventListener('keydown', e => {
+          if (gameOver || gameClear || paused || !renderer) return;
+          const rect = renderer.domElement.getBoundingClientRect();
+          const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          const target = nx * (FIELD_W / 2 - PADDLE_W / 2 + 0.5);
+          paddle.position.x = clamp(target, WALL_L + PADDLE_W / 2, WALL_R - PADDLE_W / 2);
+        });
 function launchBall() {
   ball.position.set(paddle.position.x, -0.8, PADDLE_Z - 2);
   const angle = (Math.random() - 0.5) * 0.8 - Math.PI / 2; // ほぼ上向き
