@@ -161,9 +161,21 @@ let renderer, scene, camera, clock;
 let paddle, ball, ballGlow;
 let ballVel    = new THREE.Vector3();
 let blocks     = [];
-let particles  = [];
-let trailParts = [];
 let starField;
+
+// ─── キー入力状態（setupControls / updatePaddle で共有）────
+const _keys = {};
+
+// ─── ブロック共有ジオメトリ ───────────────────────────────
+let _blockGeo = null;
+let _edgeGeo  = null;
+let _markGeo  = null;
+
+// ─── パーティクル / トレイル プール ──────────────────────
+const _PART_POOL_SIZE  = 120;
+const _TRAIL_POOL_SIZE = 30;
+const _partPool  = [];
+const _trailPool = [];
 
 // ─── DOM ─────────────────────────────────────────
 const container  = document.getElementById('game-container');
@@ -498,6 +510,9 @@ function initGame(startStage = 0) {
   pl1.position.set(0, 8, 0);
   scene.add(pl1);
 
+  // ─ オブジェクトプール初期化（scene 生成後に実行） ─
+  _initPools();
+
   // ─ 宇宙背景 ─
   createStarField();
   createNebula();
@@ -739,13 +754,22 @@ function createBall() {
 //  ブロック
 // ================================================================
 function createBlocks() {
-  // 既存ブロックをシーンから除去
+  // 既存ブロックをシーンから除去（子要素のマテリアルも正しく解放）
   blocks.forEach(b => {
-    scene.remove(b);
-    b.geometry.dispose();
+    b.children.forEach(child => child.material && child.material.dispose());
     b.material.dispose();
+    scene.remove(b);
   });
   blocks = [];
+
+  // 共有ジオメトリを再生成（ステージをまたいでも同サイズなので使い回し可能だが
+  // 念のりセット時も再生成して確実に解放する）
+  if (_blockGeo) _blockGeo.dispose();
+  if (_edgeGeo)  _edgeGeo.dispose();
+  if (_markGeo)  _markGeo.dispose();
+  _blockGeo = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
+  _edgeGeo  = new THREE.BoxGeometry(BLOCK_W + 0.05, 0.02, BLOCK_D + 0.05);
+  _markGeo  = new THREE.BoxGeometry(BLOCK_W * 0.3, 0.03, BLOCK_D * 0.3);
 
   const stage = STAGES[currentStage];
   const cols = stage.cols;
@@ -765,7 +789,7 @@ function createBlocks() {
 
       const isDurable = cell >= 2;
       const hp = isDurable ? cell : 1;
-      const geo = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
+      // ジオメトリは共有、マテリアルはブロックごとに生成
       const mat = new THREE.MeshPhysicalMaterial({
         color: isDurable ? 0x888899 : rc.color,
         metalness: isDurable ? 0.95 : 0.85,
@@ -774,7 +798,7 @@ function createBlocks() {
         emissiveIntensity: isDurable ? 0.6 : 0.45,
         clearcoat: 0.5,
       });
-      const mesh = new THREE.Mesh(geo, mat);
+      const mesh = new THREE.Mesh(_blockGeo, mat);
       mesh.position.set(
         startX + c * (BLOCK_W + BLOCK_GAP),
         -0.3,
@@ -783,37 +807,35 @@ function createBlocks() {
       mesh.userData = {
         row: r, col: c,
         points: (rows - r) * 10 * (isDurable ? 3 : 1),
-        hp: hp,
-        maxHp: hp,
+        hp, maxHp: hp,
         originalColor: isDurable ? 0x888899 : rc.color,
         originalEmissive: isDurable ? 0x334455 : rc.emissive,
+        tintUntil: 0,
+        damagedColor: 0,
       };
       scene.add(mesh);
       blocks.push(mesh);
 
-      // 上面にうっすら光るエッジ
-      const edgeColor = isDurable ? 0xff6644 : C.blue;
-      const edgeGeo = new THREE.BoxGeometry(BLOCK_W + 0.05, 0.02, BLOCK_D + 0.05);
+      // 上面にうっすら光るエッジ（共有ジオメトリ使用）
       const edgeMat = new THREE.MeshBasicMaterial({
-        color: edgeColor,
+        color: isDurable ? 0xff6644 : C.blue,
         transparent: true,
         opacity: isDurable ? 0.35 : 0.18,
         depthWrite: false,
       });
-      const edge = new THREE.Mesh(edgeGeo, edgeMat);
+      const edge = new THREE.Mesh(_edgeGeo, edgeMat);
       edge.position.y = BLOCK_H / 2;
       mesh.add(edge);
 
-      // 耐久ブロックにマーク表示
+      // 耐久ブロックにマーク表示（共有ジオメトリ使用）
       if (isDurable) {
-        const markGeo = new THREE.BoxGeometry(BLOCK_W * 0.3, 0.03, BLOCK_D * 0.3);
         const markMat = new THREE.MeshBasicMaterial({
           color: 0xff4422,
           transparent: true,
           opacity: 0.5,
           depthWrite: false,
         });
-        const mark = new THREE.Mesh(markGeo, markMat);
+        const mark = new THREE.Mesh(_markGeo, markMat);
         mark.position.y = BLOCK_H / 2 + 0.02;
         mesh.add(mark);
       }
@@ -935,34 +957,29 @@ function setupControls() {
   }, { passive: true });
 
   // キーボード
-  const keys = {};
   window.addEventListener('keydown', e => {
     if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
       e.preventDefault();
-      keys[e.code] = true;
+      _keys[e.code] = true;
     }
     // Pキーで一時停止/再開
     if (e.code === 'KeyP' && started && !gameOver && !gameClear) {
       paused = !paused;
-      if (paused) {
-        showPauseOverlay();
-      } else {
-        hidePauseOverlay();
-      }
+      if (paused) showPauseOverlay();
+      else hidePauseOverlay();
     }
   });
-  window.addEventListener('keyup', e => { keys[e.code] = false; });
+  window.addEventListener('keyup', e => { _keys[e.code] = false; });
+}
 
-  (function keyLoop() {
-    if (paddle && !gameOver && !gameClear && !paused) {
-      const speed = 0.55;
-      if (keys['ArrowLeft'])
-        paddle.position.x = Math.max(WALL_L + PADDLE_W / 2, paddle.position.x - speed);
-      if (keys['ArrowRight'])
-        paddle.position.x = Math.min(WALL_R - PADDLE_W / 2, paddle.position.x + speed);
-    }
-    requestAnimationFrame(keyLoop);
-  })();
+// キーボード入力によるパドル移動（animate ループから毎フレーム呼ぶ）
+function updatePaddle() {
+  if (!paddle || !started || gameOver || gameClear || paused) return;
+  const SPEED = 0.55;
+  if (_keys['ArrowLeft'])
+    paddle.position.x = Math.max(WALL_L + PADDLE_W / 2, paddle.position.x - SPEED);
+  if (_keys['ArrowRight'])
+    paddle.position.x = Math.min(WALL_R - PADDLE_W / 2, paddle.position.x + SPEED);
 }
 function launchBall() {
   ball.position.set(paddle.position.x, -0.8, PADDLE_Z - 2);
@@ -1073,79 +1090,93 @@ function hideMessage() {
 }
 
 // ================================================================
-//  パーティクル（ブロック破壊エフェクト）
+//  パーティクル / トレイル — オブジェクトプール
+//  initGame() 内の _initPools() で一度だけ生成し、不可視にして
+//  シーンに常駐させる。毎フレームの Mesh 生成・破棄を排除。
 // ================================================================
+function _initPools() {
+  const partGeo  = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+  const trailGeo = new THREE.SphereGeometry(BALL_R * 0.5, 8, 8);
+
+  for (let i = 0; i < _PART_POOL_SIZE; i++) {
+    const mat  = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false });
+    const mesh = new THREE.Mesh(partGeo, mat);
+    mesh.visible = false;
+    mesh.userData = { vel: new THREE.Vector3(), life: 0, decay: 0 };
+    scene.add(mesh);
+    _partPool.push(mesh);
+  }
+
+  for (let i = 0; i < _TRAIL_POOL_SIZE; i++) {
+    const mat  = new THREE.MeshBasicMaterial({ color: C.yellow, transparent: true, depthWrite: false });
+    const mesh = new THREE.Mesh(trailGeo, mat);
+    mesh.visible = false;
+    mesh.userData = { life: 0 };
+    scene.add(mesh);
+    _trailPool.push(mesh);
+  }
+}
+
 function spawnParticles(pos, color, count = 12) {
-  for (let i = 0; i < count; i++) {
-    const geo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
-    const mat = new THREE.MeshBasicMaterial({
-      color,
-      transparent: true,
-      opacity: 1,
-      depthWrite: false,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.copy(pos);
-    mesh.userData.vel = new THREE.Vector3(
+  let n = 0;
+  for (let i = 0; i < _partPool.length && n < count; i++) {
+    const p = _partPool[i];
+    if (p.visible) continue;
+    p.visible = true;
+    p.position.copy(pos);
+    p.material.color.setHex(color);
+    p.material.opacity = 1;
+    p.scale.setScalar(1);
+    p.rotation.set(0, 0, 0);
+    p.userData.vel.set(
       (Math.random() - 0.5) * 0.4,
       Math.random() * 0.3 + 0.1,
       (Math.random() - 0.5) * 0.4,
     );
-    mesh.userData.life = 1.0;
-    mesh.userData.decay = 0.01 + Math.random() * 0.02;
-    scene.add(mesh);
-    particles.push(mesh);
+    p.userData.life  = 1.0;
+    p.userData.decay = 0.01 + Math.random() * 0.02;
+    n++;
   }
 }
 
 function updateParticles() {
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
+  for (let i = 0; i < _partPool.length; i++) {
+    const p = _partPool[i];
+    if (!p.visible) continue;
     p.position.add(p.userData.vel);
     p.userData.vel.y -= 0.005; // 重力
-    p.userData.life -= p.userData.decay;
+    p.userData.life  -= p.userData.decay;
     p.material.opacity = Math.max(0, p.userData.life);
     p.rotation.x += 0.1;
     p.rotation.z += 0.08;
-    if (p.userData.life <= 0) {
-      scene.remove(p);
-      p.geometry.dispose();
-      p.material.dispose();
-      particles.splice(i, 1);
-    }
+    if (p.userData.life <= 0) p.visible = false;
   }
 }
 
 // ================================================================
-//  ボールトレイル
+//  ボールトレイル（プール版）
 // ================================================================
 function spawnTrail() {
-  const geo = new THREE.SphereGeometry(BALL_R * 0.5, 8, 8);
-  const mat = new THREE.MeshBasicMaterial({
-    color: C.yellow,
-    transparent: true,
-    opacity: 0.3,
-    depthWrite: false,
-  });
-  const t = new THREE.Mesh(geo, mat);
-  t.position.copy(ball.position);
-  t.userData.life = 1.0;
-  scene.add(t);
-  trailParts.push(t);
+  for (let i = 0; i < _trailPool.length; i++) {
+    const t = _trailPool[i];
+    if (t.visible) continue;
+    t.visible = true;
+    t.position.copy(ball.position);
+    t.userData.life = 1.0;
+    t.material.opacity = 0.3;
+    t.scale.setScalar(1);
+    return;
+  }
 }
 
 function updateTrail() {
-  for (let i = trailParts.length - 1; i >= 0; i--) {
-    const t = trailParts[i];
-    t.userData.life -= 0.06;
+  for (let i = 0; i < _trailPool.length; i++) {
+    const t = _trailPool[i];
+    if (!t.visible) continue;
+    t.userData.life  -= 0.06;
     t.material.opacity = t.userData.life * 0.25;
     t.scale.setScalar(t.userData.life);
-    if (t.userData.life <= 0) {
-      scene.remove(t);
-      t.geometry.dispose();
-      t.material.dispose();
-      trailParts.splice(i, 1);
-    }
+    if (t.userData.life <= 0) t.visible = false;
   }
 }
 
@@ -1228,18 +1259,15 @@ function updateBall() {
         // パーティクル
         spawnParticles(blk.position.clone(), blk.material.color.getHex(), 14);
       } else {
-        // 耐久ブロック：ダメージ表現（色を変えてフラッシュ）
+        // 耐久ブロック：ダメージ表現（フラッシュ→被ダメカラーへ）
+        // setTimeout の代わりに performance.now() で管理し GC を回避
         blk.material.color.setHex(0xff6644);
         blk.material.emissive.setHex(0xff2200);
-        setTimeout(() => {
-          if (blk.userData.hp > 0) {
-            // 少しダメージを受けた色に変化
-            blk.material.color.setHex(
-              lerpColor(blk.userData.originalColor, 0xff4422, 1 - blk.userData.hp / blk.userData.maxHp)
-            );
-            blk.material.emissive.setHex(blk.userData.originalEmissive);
-          }
-        }, 100);
+        blk.userData.tintUntil    = performance.now() + 100;
+        blk.userData.damagedColor = lerpColor(
+          blk.userData.originalColor, 0xff4422,
+          1 - blk.userData.hp / blk.userData.maxHp
+        );
         // ヒットエフェクト
         spawnParticles(blk.position.clone(), 0xff6644, 6);
         combo++;
@@ -1281,6 +1309,22 @@ function updateBall() {
 }
 
 // ================================================================
+//  ブロック色の遅延復帰（setTimeout の代替）
+// ================================================================
+function updateBlockTints() {
+  const now = performance.now();
+  for (let i = 0; i < blocks.length; i++) {
+    const blk = blocks[i];
+    if (!blk.userData.tintUntil || now < blk.userData.tintUntil) continue;
+    blk.userData.tintUntil = 0;
+    if (blk.userData.hp > 0) {
+      blk.material.color.setHex(blk.userData.damagedColor);
+      blk.material.emissive.setHex(blk.userData.originalEmissive);
+    }
+  }
+}
+
+// ================================================================
 //  小エフェクト
 // ================================================================
 function spawnWallSpark(pos, _side) {
@@ -1301,12 +1345,14 @@ function flashPaddle() {
 // ================================================================
 function animate() {
   requestAnimationFrame(animate);
-  const dt = clock.getDelta();
+  clock.getDelta(); // elapsed time 更新用
 
-  updateBall();
+  updatePaddle();     // キーボード入力によるパドル移動
+  updateBall();       // ボール物理・当たり判定
+  updateBlockTints(); // 耐久ブロックの色遅延復帰
+
   if (!paused) {
     updateParticles();
-    // トレイル
     if (!gameOver && !gameClear) spawnTrail();
     updateTrail();
     // 星のゆっくり回転
