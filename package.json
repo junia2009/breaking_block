@@ -5,5 +5,8 @@
   "main": "main.js",
   "scripts": {},
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.97"
+  }
 }
